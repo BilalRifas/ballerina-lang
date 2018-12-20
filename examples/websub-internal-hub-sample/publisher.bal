@@ -1,4 +1,5 @@
-// The Ballerina WebSub Publisher brings up the internal Ballerina hub, registers a topic at the hub, and publishes updates to the topic.
+// The Ballerina WebSub Publisher brings up the internal Ballerina hub,
+// registers a topic at the hub, and publishes updates to the topic.
 import ballerina/io;
 import ballerina/http;
 import ballerina/runtime;

@@ -1,4 +1,5 @@
-// The Ballerina WebSub Publisher, which registers a topic at the hub and publishes updates to the hub for the topic.
+// The Ballerina WebSub Publisher, which registers a topic at the hub
+// and publishes updates to the hub for the topic.
 import ballerina/io;
 import ballerina/runtime;
 import ballerina/websub;

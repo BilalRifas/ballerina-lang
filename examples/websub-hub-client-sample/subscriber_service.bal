@@ -6,9 +6,10 @@ import ballerina/websub;
 listener websub:Listener websubEP = new(8181);
 
 // Annotations specifying the subscription parameters.
-// Note the omission of subscribeOnStartUp as an annotation due to which a subscription request would not be sent
-// automatically on start up.
-// Also note the exclusion of the onIntentVerification resource which will result in auto intent-verification.
+// Note the omission of subscribeOnStartUp as an annotation due to
+// which a subscription request would not be sent automatically on start up.
+// Also note the exclusion of the onIntentVerification resource which
+// will result in auto intent-verification.
 @websub:SubscriberServiceConfig {
     path: "/websub",
     topic: "http://websubpubtopic.com",
