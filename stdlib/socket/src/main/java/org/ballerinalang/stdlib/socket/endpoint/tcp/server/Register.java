@@ -63,7 +63,7 @@ public class Register extends BlockingNativeCallableUnit {
         context.setReturnValues();
     }
 
-    private SocketService getSocketService(Context context, Struct listenerEndpoint) {
+    private SocketService getSocketService(Context context, Struct listenerEndpoint ) {
         Map<String, Resource> resources = getResourceMap(context);
         ServerSocketChannel serverSocket = (ServerSocketChannel) listenerEndpoint.getNativeData(SERVER_SOCKET_KEY);
         return new SocketService(serverSocket, resources);

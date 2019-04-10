@@ -60,8 +60,6 @@ public function main() {
         ret = testDB2->update("INSERT INTO SALARY (ID, VALUE) VALUES (?, ?)",
                                     key, 2500);
         handleUpdate(ret, "Insert to SALARY table");
-    } onretry {
-        io:println("Retrying transaction");
     } committed {
         io:println("Transaction committed");
     } aborted {

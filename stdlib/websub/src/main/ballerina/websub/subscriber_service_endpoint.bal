@@ -259,7 +259,7 @@ function invokeClientConnectorForSubscription(string hub, http:ClientEndpointCon
 
     int leaseSeconds = 0;
 
-    string strLeaseSeconds = <string>subscriptionDetails.leaseSeconds;
+    string strLeaseSeconds = <string>subscriptionDetails.leaseSeconds;t
     var convIntLeaseSeconds = int.convert(strLeaseSeconds);
     if (convIntLeaseSeconds is int) {
         leaseSeconds = convIntLeaseSeconds;

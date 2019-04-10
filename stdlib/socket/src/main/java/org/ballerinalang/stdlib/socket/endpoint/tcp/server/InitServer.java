@@ -67,6 +67,7 @@ public class InitServer extends BlockingNativeCallableUnit {
             serviceEndpoint.addNativeData(LISTENER_CONFIG, endpointConfig);
             int port = (int) context.getIntArgument(0);
             serviceEndpoint.addNativeData(CONFIG_FIELD_PORT, port);
+        
         } catch (SocketException e) {
             context.setReturnValues(SocketUtils.createSocketError(context, "Unable to bind the socket port"));
             return;
