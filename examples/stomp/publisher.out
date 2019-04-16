@@ -1,0 +1,28 @@
+# To run the client, navigate to the directory that contains the
+# `.bal` file and use the `ballerina run --experimental` command.
+$ ballerina run --experimental publisher.bal
+
+[ballerina/http] started HTTP/WS endpoint 172.17.0.1:38163
+Starting up the Ballerina Stomp Service
+
+Successfully connected to stomp broker
+Connect to: 61613
+CONNECTED
+server:RabbitMQ/3.6.15
+session:session-ayVnDSHIzcO5_iTmH9tafA
+heart-beat:0,0
+version:1.1
+
+# transaction has started
+Begin has been made with transaction: b632dfdb-e182-44bd-a2f7-66652129183c
+2019-02-21 11:01:33,882 INFO  [ballerina/transactions] - Created transaction: 7feaf167-de8e-446a-a71f-5982f82af488
+Message: Hello World From Ballerina is sent successfully
+RECEIPT
+receipt-id:abee3b5e-a3b6-4ae9-aeb2-fa127c840aaf
+
+# disconnecting from the broker port
+Disconnected from stomp broker successfully
+Leave from: 61613
+2019-02-21 11:01:38,960 INFO  [ballerina/transactions] - Running 2-phase commit for transaction: 7feaf167-de8e-446a-a71f-5982f82af488:$anon$.$1
+RECEIPT
+receipt-id:abee3b5e-a3b6-4ae9-aeb2-fa127c840aaf
