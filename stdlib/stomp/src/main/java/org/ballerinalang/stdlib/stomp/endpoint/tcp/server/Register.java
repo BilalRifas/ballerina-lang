@@ -29,7 +29,6 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.stdlib.stomp.*;
 import static org.ballerinalang.stdlib.stomp.StompConstants.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
@@ -51,25 +50,24 @@ public class Register implements NativeCallableUnit {
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
         try {
-            Struct clientEndpoint = BLangConnectorSPIUtil.getConnectorEndpointStruct(context);
-            BMap<String, BValue> config = (BMap<String, BValue>) clientEndpoint.getNativeData(CLIENT_CONFIG);
+            BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
 
             // Get service config annotation values
             Service service = BLangConnectorSPIUtil.getServiceRegistered(context);
-
             Annotation serviceAnnotation = getServiceConfigAnnotation(service);
             Struct annotationValue = serviceAnnotation.getValue();
             String destination = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DESTINATION);
             String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
             String strLowerAck = ackMode.toLowerCase();
 
+            // Get service resources
             Resource onMessageResource = service.getResources()[1];
             Resource onErrorResource = service.getResources()[0];
-            clientEndpoint.addNativeData(RESOURCE_ON_MESSAGE, onMessageResource);
-            clientEndpoint.addNativeData(RESOURCE_ON_ERROR, onErrorResource);
+            connection.addNativeData(RESOURCE_ON_MESSAGE, onMessageResource);
+            connection.addNativeData(RESOURCE_ON_ERROR, onErrorResource);
 
             // get stompClient object created in intListener
-            DefaultStompClient client = (DefaultStompClient) clientEndpoint.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
+            DefaultStompClient client = (DefaultStompClient) connection.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
 
             if (onMessageResource != null) {
                 client.setOnMessageResource(onMessageResource);
@@ -95,11 +93,6 @@ public class Register implements NativeCallableUnit {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
             }
-
-            // unsubscribe
-            // client.unsubscribe(destination);
-            // disconnect
-            // client.disconnect();
 
             context.setReturnValues();
         } catch (StompException e) {

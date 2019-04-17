@@ -20,9 +20,6 @@ package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
-import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
-import org.ballerinalang.connector.api.Resource;
-import org.ballerinalang.connector.api.Struct;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BMap;
@@ -32,12 +29,10 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.stdlib.stomp.*;
 import static org.ballerinalang.stdlib.stomp.StompConstants.*;
-
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 /**
  * Initialize the server stomp endpoint.
@@ -57,14 +52,9 @@ public class InitListener extends BlockingNativeCallableUnit {
     @Override
     public void execute(Context context) {
         try {
-            // TODO get rid of struct and use BMap check with others
-            Struct clientEndpoint = BLangConnectorSPIUtil.getConnectorEndpointStruct(context);
-            Struct clientEndpointConfig = clientEndpoint.getStructField(CLIENT_CONFIG);
             BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
-            Map<String, Resource> resourceMap = null;
-            clientEndpoint.addNativeData(CLIENT_CONFIG, endpointConfig);
-
-            BMap<String, BValue> config = (BMap<String, BValue>) clientEndpoint.getNativeData(CLIENT_CONFIG);
+            endpointConfig.addNativeData(CLIENT_CONFIG, endpointConfig);
+            BMap<String, BValue> config = (BMap<String, BValue>) endpointConfig.getNativeData(CLIENT_CONFIG);
 
             BString login = (BString) config.get(StompConstants.CONFIG_FIELD_LOGIN);
             BString passcode = (BString) config.get(StompConstants.CONFIG_FIELD_PASSCODE);
@@ -80,9 +70,9 @@ public class InitListener extends BlockingNativeCallableUnit {
     }
 
     public void run(URI uri, Context context) {
-        Struct clientEndpoint = BLangConnectorSPIUtil.getConnectorEndpointStruct(context);
+        BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
         DefaultStompClient client = new DefaultStompClient(uri);
-        clientEndpoint.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, client);
+        connection.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, client);
     }
 }
 

@@ -28,7 +28,7 @@ service stompListeners on consumerEndpoint  {
         //var messageContent = message.getContent();
 
         io:println("Message : ", message);
-        //var messageAck = caller.getAck();
+        //var messageAck = caller.ack();
     }
 
     // // This resource is invoked when the connection is interrupted.

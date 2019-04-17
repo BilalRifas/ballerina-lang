@@ -24,7 +24,6 @@ import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
  *
  * @since 0.990.2
  */
-
 @BallerinaFunction(orgName = "ballerina",
         packageName = "stomp",
         functionName = "start",
@@ -41,7 +39,6 @@ import org.slf4j.LoggerFactory;
                 structType = "Listener",
                 structPackage = STOMP_PACKAGE), isPublic = true)
 public class Start extends BlockingNativeCallableUnit {
-
     private static final Logger log = LoggerFactory.getLogger(Start.class);
 
     @Override

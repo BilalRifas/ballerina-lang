@@ -20,21 +20,13 @@ package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
-import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
-import org.ballerinalang.connector.api.Struct;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
-import org.ballerinalang.stdlib.stomp.DefaultStompClient;
-import org.ballerinalang.stdlib.stomp.StompClient;
-import org.ballerinalang.stdlib.stomp.StompConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URISyntaxException;
-
 import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
@@ -53,18 +45,16 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 public class GetContent extends BlockingNativeCallableUnit {
     private static final Logger log = LoggerFactory.getLogger(GetContent.class);
-    public static String stompMessage;
+    public static String stompMessageId;
 
-    public void sendPayload(String message) {
-        this.stompMessage = message;
+    public void sendPayload(String message){
+        this.stompMessageId = message;
     }
-
-    // get the native data of message
 
     @Override
     public void execute(Context context) {
-        String stompMessage = this.stompMessage;
-
+        String stompMessage = this.stompMessageId;
+        System.out.println(stompMessage);
         context.setReturnValues(new BString(stompMessage));
     }
 }

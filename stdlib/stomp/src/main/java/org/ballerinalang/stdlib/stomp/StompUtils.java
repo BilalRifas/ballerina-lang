@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.ballerinalang.stdlib.stomp;
 
 import org.ballerinalang.bre.bvm.BLangVMErrors;
@@ -9,7 +27,6 @@ import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.util.codegen.ProgramFile;
 import org.ballerinalang.bre.Context;
-
 import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 public class StompUtils {
@@ -24,10 +41,10 @@ public class StompUtils {
      * @return Error struct
      */
     public static BError getError(Context context, String errMsg) {
-        BMap<String, BValue> artemisErrorRecord = createStompErrorRecord(context);
-        artemisErrorRecord.put(StompConstants.STOMP_ERROR_MESSAGE, new BString(errMsg));
+        BMap<String, BValue> StompErrorRecord = createStompErrorRecord(context);
+        StompErrorRecord.put(StompConstants.STOMP_ERROR_MESSAGE, new BString(errMsg));
         return BLangVMErrors.createError(context, true, BTypes.typeError, StompConstants.STOMP_ERROR_CODE,
-                artemisErrorRecord);
+                StompErrorRecord);
     }
 
     private static BMap<String, BValue> createStompErrorRecord(Context context) {
@@ -37,7 +54,7 @@ public class StompUtils {
 
     public static BError getError(Context context, Exception exception) {
         if (exception.getMessage() == null) {
-            return getError(context, "Artemis connector error");
+            return getError(context, "Stomp error");
         } else {
             return getError(context, exception.getMessage());
         }

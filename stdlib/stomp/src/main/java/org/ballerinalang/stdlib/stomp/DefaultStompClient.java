@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.ballerinalang.stdlib.stomp;
 
 import org.ballerinalang.bre.bvm.BLangVMErrors;
@@ -8,19 +26,18 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.services.ErrorHandlerUtils;
+import org.ballerinalang.stdlib.stomp.endpoint.tcp.server.GetContent;
 import org.ballerinalang.util.codegen.ProgramFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.HashMap;
 
 /**
  * Register stomp listener service.
  *
  * @since 0.990.2
  */
-
 public class DefaultStompClient extends StompClient {
 
     private Resource messageResource;
@@ -38,7 +55,6 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onDisconnected() {
-
     }
 
     public void setOnMessageResource(Resource onMessageResource) {
@@ -52,6 +68,9 @@ public class DefaultStompClient extends StompClient {
     @Override
     public void onMessage(String messageId, String body) {
         Resource msgResource = this.messageResource;
+
+        GetContent payload = new GetContent();
+        payload.sendPayload(messageId);
 
         try {
             Executor.submit(msgResource, new ResponseCallback(body), null, null, getMsgSignatureParameters(msgResource, body));
@@ -80,7 +99,6 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onReceipt(String receiptId) {
-
     }
 
     @Override

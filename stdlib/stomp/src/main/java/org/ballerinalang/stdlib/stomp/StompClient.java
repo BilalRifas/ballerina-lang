@@ -25,7 +25,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 

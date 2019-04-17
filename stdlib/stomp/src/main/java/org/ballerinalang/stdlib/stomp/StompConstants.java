@@ -24,24 +24,20 @@ package org.ballerinalang.stdlib.stomp;
  * @since 0.990.2
  */
 public class StompConstants {
-    private StompConstants() {
-    }
 
     public static final String STOMP_PACKAGE = "ballerina/stomp";
     public static final String RESOURCE_ON_MESSAGE = "onMessage";
     public static final String RESOURCE_ON_ERROR = "onError";
 
+    // Stomp configs fields
     public static final String CONFIG_FIELD_HOST = "host";
     public static final String CONFIG_FIELD_PORT = "port";
     public static final String CONFIG_FIELD_LOGIN = "login";
     public static final String CONFIG_FIELD_PASSCODE = "passcode";
-    public static final String CONFIG_FIELD_URI = "connectionURI";
     public static final String CONFIG_FIELD_ACKMODE = "ackMode";
-
     public static final String CONFIG_FIELD_DESTINATION = "destination";
-    public static final String CONFIG_FIELD_DURABLE = "durable";
-    public static final String CLIENT_CONFIG = "";
 
+    public static final String CLIENT_CONFIG = "config";
     public static final String CONFIG_FIELD_CLIENT_OBJ = "client";
 
     public static final String STOMP_MESSAGE = "stomp-message";
