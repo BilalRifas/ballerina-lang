@@ -26,12 +26,17 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.services.ErrorHandlerUtils;
-import org.ballerinalang.stdlib.stomp.endpoint.tcp.server.GetContent;
+import org.ballerinalang.stdlib.stomp.endpoint.tcp.server.Start;
 import org.ballerinalang.util.codegen.ProgramFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.ballerinalang.stdlib.stomp.StompConstants.*;
 
 /**
  * Register stomp listener service.
@@ -39,9 +44,11 @@ import java.net.URI;
  * @since 0.990.2
  */
 public class DefaultStompClient extends StompClient {
-
+    private CallableUnitCallback callableUnit;
+    private Map<String, Service> serviceRegistry = new HashMap<>();
     private Resource messageResource;
     private Resource errorResource;
+    private boolean connected;
     private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
 
     public DefaultStompClient(URI uri) {
@@ -50,40 +57,75 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onConnected(String sessionId) {
-        log.debug("Successfully connected" + " SessionId : " + sessionId + "\n");
+        this.connected = true;
+
+        if (callableUnit != null) {
+            callableUnit.notifySuccess();
+        }
+    }
+
+    public boolean isConnected(){
+        return this.connected;
+    }
+
+    public void setCallableUnit(CallableUnitCallback callableUnit) {
+        this.callableUnit = callableUnit;
     }
 
     @Override
     public void onDisconnected() {
     }
 
-    public void setOnMessageResource(Resource onMessageResource) {
-        this.messageResource = onMessageResource;
-    }
-
-    public void setOnErrorResource(Resource onErrorResource) {
-        this.errorResource = onErrorResource;
-    }
-
     @Override
-    public void onMessage(String messageId, String body) {
-        Resource msgResource = this.messageResource;
+    public void onMessage(String messageId, String body, String destination) {
 
-        GetContent payload = new GetContent();
-        payload.sendPayload(messageId);
+        for (Map.Entry<String, Service> entry : this.serviceRegistry.entrySet()) {
+            // Get service resources by iterating
+            Service subService = entry.getValue();
+            String subMapDestination = entry.getKey();
+            // TODO Remove irrelevant checking, & make a separate method
+            int count;
+            for (count = 0; count < subService.getResources().length; count++) {
+                // Accessing each element of array
+                String resourceName = subService.getResources()[count].getName();
+                if (resourceName.equals("onMessage")) {
+                    Resource onMessageResource = subService.getResources()[count];
+                    if (onMessageResource != null) {
+                        this.messageResource = onMessageResource;
+                    }
+                }
+            }
 
-        try {
-            Executor.submit(msgResource, new ResponseCallback(body), null, null, getMsgSignatureParameters(msgResource, body));
-        } catch (BallerinaConnectorException c) {
-            onError(body, c.getMessage());
+            ProgramFile programFile = this.messageResource.getResourceInfo().getPackageInfo().getProgramFile();
+            BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile, STOMP_PACKAGE, MESSAGE_OBJ);
+
+            List<ParamDetail> paramDetails = this.messageResource.getParamDetails();
+            String callerType = paramDetails.get(0).getVarType().toString();
+
+            if (subMapDestination.equals(destination)) {
+                if (callerType.equals("string")) {
+                    Executor.submit(this.messageResource, new ResponseCallback(body, messageId), new HashMap<>(), null, new BString(body));
+                } else if (callerType.equals("ballerina/stomp:Message")) {
+                    msgObj.addNativeData(STOMP_MSG, body);
+                    msgObj.put(MSG_CONTENT_NAME, new BString(body));
+                    msgObj.put(MSG_DESTINATION, new BString(destination));
+                    msgObj.put(MSG_ID, new BString(messageId));
+                    msgObj.addNativeData(CONFIG_FIELD_CLIENT_OBJ, this);
+                    Executor.submit(this.messageResource, new ResponseCallback(body, messageId), new HashMap<>(), null, msgObj);
+                }
+            } else {
+                log.debug("Service's destination is not same as the message received destination");
+            }
         }
     }
 
-    private static class ResponseCallback implements CallableUnitCallback {
+    private class ResponseCallback implements CallableUnitCallback {
         private String message;
+        private String messageId;
 
-        ResponseCallback(String message) {
+        ResponseCallback(String message, String messageId) {
             this.message = message;
+            this.messageId = messageId;
         }
 
         @Override
@@ -103,33 +145,49 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onError(String message, String description) {
-        Resource errorResource = this.errorResource;
-        try {
-            Executor.submit(errorResource, new ResponseCallback(message), null, null, getErrorSignatureParameters(errorResource, message));
-        } catch (BallerinaConnectorException c) {
-            log.error("Error while executing onError resource", c);
+
+        for (Map.Entry<String, Service> entry : this.serviceRegistry.entrySet()) {
+            Service subService = entry.getValue();
+
+            int count;
+            for (count = 0; count < subService.getResources().length; count++) {
+                // Accessing each element of array
+                String resourceName = subService.getResources()[count].getName();
+                if (resourceName.equals("onError")) {
+                    Resource onErrorResource = subService.getResources()[count];
+                    if (onErrorResource != null) {
+                        this.errorResource = onErrorResource;
+                    }
+                }
+            }
+            try {
+                Executor.submit(this.errorResource, new ResponseCallback(message, description),
+                        null, null, getErrorSignatureParameters(errorResource, message));
+            } catch (BallerinaConnectorException c) {
+                log.error("Error while executing onError resource", c);
+            }
         }
     }
 
     @Override
     public void onCriticalError(Exception e) {
+        System.out.println("Error: " + e);
     }
 
-    private BValue getMsgSignatureParameters(Resource onMessageResource, String message) {
-        ProgramFile programFile = onMessageResource.getResourceInfo().getPackageInfo().getProgramFile();
-        BMap<String, BValue> messageObj = BLangConnectorSPIUtil.createBStruct(
-                programFile, StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
-        messageObj.addNativeData(StompConstants.STOMP_MESSAGE, message);
-        messageObj.put(StompConstants.MSG_CONTENT_NAME, new BString(message));
-        return new BString(message);
+    public void registerService(Service service, String destination) {
+        this.serviceRegistry.put(destination, service);
+    }
+
+    public Map getDestinationValue() {
+        return this.serviceRegistry;
     }
 
     private BValue getErrorSignatureParameters(Resource onErrorResource, String errorMessage) {
         ProgramFile programFile = onErrorResource.getResourceInfo().getPackageInfo().getProgramFile();
         BMap<String, BValue> messageObj = BLangConnectorSPIUtil.createBStruct(
-                programFile, StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
-        BError error = StompUtils.createSocketError(programFile, errorMessage);
-        messageObj.addNativeData(StompConstants.STOMP_MESSAGE, errorMessage);
+                programFile, STOMP_PACKAGE, MESSAGE_OBJ);
+        BError error = StompUtils.createStompError(programFile, errorMessage);
+        messageObj.addNativeData(STOMP_MESSAGE, errorMessage);
         return error;
     }
 

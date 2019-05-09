@@ -27,12 +27,20 @@ import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.stdlib.stomp.*;
-import static org.ballerinalang.stdlib.stomp.StompConstants.*;
-import java.net.URI;
+import org.ballerinalang.stdlib.stomp.DefaultStompClient;
+import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 import java.net.URISyntaxException;
+
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_HOST;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PORT;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_LOGIN;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PASSCODE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
 
 /**
  * Initialize the server stomp endpoint.
@@ -48,31 +56,58 @@ import java.net.URISyntaxException;
 )
 public class InitListener extends BlockingNativeCallableUnit {
     private static final Logger log = LoggerFactory.getLogger(InitListener.class);
+    private static String userLogin;
+    private static String userPasscode;
+    private static String hostName;
+    private static Integer stompPort;
 
     @Override
     public void execute(Context context) {
         try {
-            BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
-            endpointConfig.addNativeData(CLIENT_CONFIG, endpointConfig);
-            BMap<String, BValue> config = (BMap<String, BValue>) endpointConfig.getNativeData(CLIENT_CONFIG);
+            BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
 
-            BString login = (BString) config.get(StompConstants.CONFIG_FIELD_LOGIN);
-            BString passcode = (BString) config.get(StompConstants.CONFIG_FIELD_PASSCODE);
-            BString host = (BString) config.get(StompConstants.CONFIG_FIELD_HOST);
-            BInteger port = (BInteger) config.get(StompConstants.CONFIG_FIELD_PORT);
+            this.validateURI(context);
+            String connectionURI = "tcp://" + this.userLogin + ":" + this.userPasscode + "@" + this.hostName + ":" + this.stompPort;
 
-            String connectionURI = "tcp://" + login + ":" + passcode + "@" + host + ":" + port;
-            this.run(new URI(connectionURI), context);
+            DefaultStompClient client = new DefaultStompClient(new URI(connectionURI));
+            connection.addNativeData(CONFIG_FIELD_CLIENT_OBJ, client);
+
             context.setReturnValues();
         } catch (URISyntaxException e) {
             context.setReturnValues(StompUtils.getError(context, e));
         }
     }
 
-    public void run(URI uri, Context context) {
-        BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
-        DefaultStompClient client = new DefaultStompClient(uri);
-        connection.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, client);
+    public void validateURI(Context context) {
+        BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
+
+        // TODO try to get rid the port by introducing only host with ex: tcp//localhost:61613
+        BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
+        if (login != null) {
+            this.userLogin = String.valueOf(login);
+        } else {
+            log.error("Login field is null");
+        }
+
+        BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
+        if (passcode != null) {
+            this.userPasscode = String.valueOf(passcode);
+        } else {
+            log.error("Passcode field is null");
+        }
+
+        BString host = (BString) endpointConfig.get(CONFIG_FIELD_HOST);
+        if (host != null) {
+            this.hostName = String.valueOf(host);
+        } else {
+            log.error("Host field is null");
+        }
+
+        BInteger port = (BInteger) endpointConfig.get(CONFIG_FIELD_PORT);
+        if (port != null) {
+            this.stompPort = Integer.parseInt(String.valueOf(port));
+        } else {
+            log.error("Port field is null");
+        }
     }
 }
-

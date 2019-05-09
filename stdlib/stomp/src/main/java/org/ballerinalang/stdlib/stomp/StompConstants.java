@@ -26,8 +26,6 @@ package org.ballerinalang.stdlib.stomp;
 public class StompConstants {
 
     public static final String STOMP_PACKAGE = "ballerina/stomp";
-    public static final String RESOURCE_ON_MESSAGE = "onMessage";
-    public static final String RESOURCE_ON_ERROR = "onError";
 
     // Stomp configs fields
     public static final String CONFIG_FIELD_HOST = "host";
@@ -40,8 +38,16 @@ public class StompConstants {
     public static final String CLIENT_CONFIG = "config";
     public static final String CONFIG_FIELD_CLIENT_OBJ = "client";
 
+    public static final String COUNTDOWN_LATCH = "countdown-latch";
+
+    // Warning suppression
+    public static final String UNCHECKED = "unchecked";
+
     public static final String STOMP_MESSAGE = "stomp-message";
     public static final String MSG_CONTENT_NAME = "content";
+    public static final String MSG_DESTINATION = "destination";
+    public static final String STOMP_MSG = "STOMPMSG";
+    public static final String MSG_ID = "message-id";
     public static final String MESSAGE_OBJ = "Message";
 
     // Error related constants

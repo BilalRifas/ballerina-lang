@@ -21,11 +21,15 @@ package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
+import org.ballerinalang.model.values.BMap;
+import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
+
+import java.util.concurrent.CountDownLatch;
+
+import static org.ballerinalang.stdlib.stomp.StompConstants.COUNTDOWN_LATCH;
 import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Stop server stomp listener.
@@ -39,10 +43,14 @@ import org.slf4j.LoggerFactory;
                 structType = "Listener",
                 structPackage = STOMP_PACKAGE), isPublic = true)
 public class Stop extends BlockingNativeCallableUnit {
-    private static final Logger log = LoggerFactory.getLogger(Stop.class);
-
     @Override
     public void execute(Context context) {
+        BMap<String, BValue> listenerObj = (BMap<String, BValue>) context.getRefArgument(0);
+        CountDownLatch countDownLatch =
+                (CountDownLatch) listenerObj.getNativeData(COUNTDOWN_LATCH);
+        if (countDownLatch != null) {
+            countDownLatch.countDown();
+        }
         context.setReturnValues();
     }
 }

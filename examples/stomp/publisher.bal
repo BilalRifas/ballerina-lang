@@ -16,11 +16,10 @@ public function main() {
     // to retry the message along with transaction Id.
 
         // This sends the Ballerina message to the stomp broker.
-        string message = "Hello World From Ballerina";
-        string destination = "/queue/test";
-        var broadcast = stompSender->send(message,destination);
-
-        // If multiple messages are sent then at the end disconnect is sent to the broker
-        // to close the socket connection from broker.
-        var disconnect = stompSender->disconnect();
+        string message1 = "Hello World From Ballerina - 1";
+        string message2 = "Hello World From Ballerina - 2";
+        string destination1 = "/queue/test";
+        string destination2 = "/queue/new";
+        var broadcast1 = stompSender->send(message1,destination1);
+        var broadcast2 = stompSender->send(message2,destination2);
 }

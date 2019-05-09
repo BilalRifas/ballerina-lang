@@ -38,7 +38,7 @@ public type Sender client object {
         acceptVersion:acceptVersion
     };
 
-    public function __init(ConnectionConfiguration stompConfig){
+    public function __init(ConnectionConfiguration stompConfig) returns error? {
         self.config = stompConfig;
         self.host = stompConfig.host;
         self.port = stompConfig.port;
@@ -51,10 +51,10 @@ public type Sender client object {
                 port: self.port,
                 callbackService: ClientService
             });
-        self->connect(stompConfig);
+        var connection = self->connect(stompConfig);
     }
 
-    public remote function connect(ConnectionConfiguration stompConfig) ;
+    public remote function connect(ConnectionConfiguration stompConfig) returns error?;
 
     public remote function send(string message, string destination) returns error?;
 
@@ -70,7 +70,7 @@ public type ConnectionConfiguration record {
     string acceptVersion;
 };
 
-remote function Sender.connect(ConnectionConfiguration stompConfig){
+public remote function Sender.connect(ConnectionConfiguration stompConfig) returns error?{
     socket:Client socketClient = self.socketClient;
     io:println("Starting up the Ballerina Stomp Service\n");
 
@@ -90,11 +90,11 @@ remote function Sender.connect(ConnectionConfiguration stompConfig){
     }
     io:println("Successfully connected to stomp broker");
 
-    // Make the publisher wait until it sends the message to the destination.
-    runtime:sleep(5000);
+    runtime:sleep(3000);
+    return;
 }
 
-remote function Sender.send(string message, string destination) returns error?{
+public remote function Sender.send(string message, string destination) returns error?{
     socket:Client socketClient = self.socketClient;
 
     // Generating unique id for message receipt.
@@ -111,13 +111,11 @@ remote function Sender.send(string message, string destination) returns error?{
     }
     io:println("Message: ", message ," is sent successfully");
 
-    // Make the publisher wait until it sends the message to the destination.
-    runtime:sleep(5000);
-
+    runtime:sleep(3000);
     return;
 }
 
-remote function Sender.disconnect() returns error?{
+public remote function Sender.disconnect() returns error?{
     socket:Client socketClient = self.socketClient;
     //string messageId = system:uuid();
 

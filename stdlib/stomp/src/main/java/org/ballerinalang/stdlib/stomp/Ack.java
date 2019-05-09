@@ -16,45 +16,54 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
+package org.ballerinalang.stdlib.stomp;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BString;
+import org.ballerinalang.model.values.BMap;
+import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.natives.annotations.ReturnType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+
+import static org.ballerinalang.stdlib.stomp.StompConstants.*;
 
 /**
- * Initialize the GetPayload.
+ * Initialize the Ack.
  *
  * @since 0.990.2
  */
 @BallerinaFunction(
         orgName = "ballerina",
         packageName = "stomp",
-        functionName = "getContent",
+        functionName = "ack",
         receiver = @Receiver(type = TypeKind.OBJECT, structType = "Message", structPackage = STOMP_PACKAGE),
-        returnType = {@ReturnType(type = TypeKind.STRING), @ReturnType(type = TypeKind.ERROR)},
         isPublic = true
 )
 
-public class GetContent extends BlockingNativeCallableUnit {
-    private static final Logger log = LoggerFactory.getLogger(GetContent.class);
-    public static String stompMessageId;
+public class Ack extends BlockingNativeCallableUnit {
+    public static String ackMode;
 
-    public void sendPayload(String message){
-        this.stompMessageId = message;
+    public void setAckMode(String ackMode) {
+        this.ackMode = ackMode;
     }
 
     @Override
     public void execute(Context context) {
-        String stompMessage = this.stompMessageId;
-        System.out.println(stompMessage);
-        context.setReturnValues(new BString(stompMessage));
+        @SuppressWarnings(StompConstants.UNCHECKED)
+        BMap<String, BValue> message = (BMap<String, BValue>) context.getRefArgument(0);
+        DefaultStompClient client = (DefaultStompClient) message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
+        BValue messageId = message.get(StompConstants.MSG_ID);
+
+        if (this.ackMode.equals("auto")|this.ackMode.equals(null)) {
+            // Do nothing
+        } else if (this.ackMode.equals("client")) {
+            try {
+                client.ack(String.valueOf(messageId));
+                System.out.println("Successfully acknowledged");
+            } catch (StompException e) {
+                context.setReturnValues(StompUtils.getError(context, "Error on acknowledging the message"));
+            }
+        }
     }
 }

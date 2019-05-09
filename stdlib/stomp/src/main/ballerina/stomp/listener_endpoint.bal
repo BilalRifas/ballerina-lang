@@ -18,7 +18,7 @@ public type Listener object {
     }
 
     public function __start() returns error? {
-       // ignored
+        return self.start();
     }
 
     public function __stop() returns error? {
@@ -29,20 +29,20 @@ public type Listener object {
         return self.register(s, annotationData);
     }
 
-    extern function initListener(ListenerConfig config) returns error?;
+    public function initListener(ListenerConfig config) returns error? = external;
 
-    extern function register(service s, map<any> annotationData) returns error?;
+    public function register(service s, map<any> annotationData) returns error? = external;
 
-    extern function start() returns error?;
+    public function start() returns error? = external;
 
-    extern function stop() returns error?;
+    public function stop() returns error? = external;
 };
 
 public type StompServiceConfig record {
-    string destination = "/queue/test";
+    string destination = "";
     string ackMode = "AUTO";
-    string durable = "false";
-    string autoDelete = "false";
+    boolean durable = false;
+    boolean autoDelete = false;
 };
 
 public annotation<service> ServiceConfig StompServiceConfig;

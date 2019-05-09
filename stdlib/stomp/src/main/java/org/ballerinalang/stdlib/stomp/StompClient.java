@@ -73,7 +73,7 @@ public abstract class StompClient {
 
     public abstract void onDisconnected();
 
-    public abstract void onMessage(String messageId, String body);
+    public abstract void onMessage(String messageId, String body, String destination);
 
     public abstract void onReceipt(String receiptId);
 
@@ -200,7 +200,8 @@ public abstract class StompClient {
                             break;
                         case MESSAGE:
                             String messageId = frame.header.get("message-id");
-                            onMessage(messageId, frame.body);
+                            String messageDestination = frame.header.get("destination");
+                            onMessage(messageId, frame.body, messageDestination);
                             break;
                         case ERROR:
                             String message = frame.header.get("message");
@@ -251,7 +252,7 @@ public abstract class StompClient {
      * @param transaction
      * @throws StompException
      */
-    public void abort(String transaction) throws StompException {
+    public void abort(String transaction, String messageId) throws StompException {
         StompFrame frame = new StompFrame(StompCommand.ABORT);
         frame.header.put("transaction", transaction);
         send(frame);

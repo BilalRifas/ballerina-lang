@@ -2,14 +2,16 @@ import ballerina/io;
 import ballerina/log;
 
 public type Message object {
+    private string content = "";
 
-    // TODO change to get Text
-    public extern function getContent() returns string|error;
+    # Get message content.
+    #
+    # + return - message content as a 'string' liternal.
+    public function getContent() returns string {
+        return self.content;
+    }
 
-    // TODO add ack method
+    public function ack() returns error? = external;
 };
 
-public type MessageConfiguration record {
-
-};
 
