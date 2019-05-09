@@ -77,10 +77,8 @@ public class Start implements NativeCallableUnit {
             Map<String, Service> subMapDestination = client.getDestinationValue();
             for (Map.Entry<String, Service> entry : subMapDestination.entrySet()) {
                 String subscribeDestination = entry.getKey();
+
                 // subscribe on queue
-
-                ThreadPoolExecutor();
-
                 // TODO need to have a busy loop/ try to get a better way.
                 // Keeps on waiting for the connected flag, once connected is made it should subscribe.
                 if (client.isConnected()) {
