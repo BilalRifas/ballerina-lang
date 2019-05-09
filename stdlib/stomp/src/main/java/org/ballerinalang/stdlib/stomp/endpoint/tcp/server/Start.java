@@ -102,9 +102,6 @@ public class Start implements NativeCallableUnit {
         }
     }
 
-    private void ThreadPoolExecutor() {
-    }
-
     public void connected(Boolean connected) {
         this.connected = connected;
     }
