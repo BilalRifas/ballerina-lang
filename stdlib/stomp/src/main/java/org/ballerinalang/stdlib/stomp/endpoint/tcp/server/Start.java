@@ -53,7 +53,7 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE
 )
 public class Start implements NativeCallableUnit {
     private CountDownLatch countDownLatch = new CountDownLatch(1);
-    private Boolean connected;
+
 
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
@@ -74,15 +74,24 @@ public class Start implements NativeCallableUnit {
             // connect to STOMP server, send CONNECT command and wait CONNECTED answer
             client.connect();
 
+            // Change variable name to destination Map or something
             Map<String, Service> subMapDestination = client.getDestinationValue();
             for (Map.Entry<String, Service> entry : subMapDestination.entrySet()) {
                 String subscribeDestination = entry.getKey();
 
-                // subscribe on queue
-                // TODO need to have a busy loop/ try to get a better way.
-                // Keeps on waiting for the connected flag, once connected is made it should subscribe.
-                if (client.isConnected()) {
-                    client.subscribe(subscribeDestination, ackMode);
+                // Keeps on waiting for the connected flag, once connected is made it should subscribe on queue.
+                int count = 0;
+                int maxTries = 3;
+                while (client.isConnected()) {
+                    {
+                        try {
+                            client.subscribe(subscribeDestination, ackMode);
+                        } catch (StompException e) {
+                            // handle exception
+                            if (++count == maxTries) throw e;
+                        }
+                    }
+
                 }
             }
 
@@ -100,10 +109,6 @@ public class Start implements NativeCallableUnit {
             context.setReturnValues(StompUtils.getError(context, e));
             callableUnitCallback.notifySuccess();
         }
-    }
-
-    public void connected(Boolean connected) {
-        this.connected = connected;
     }
 
     @Override

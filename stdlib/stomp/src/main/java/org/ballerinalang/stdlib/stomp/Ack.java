@@ -29,7 +29,7 @@ import org.ballerinalang.natives.annotations.Receiver;
 import static org.ballerinalang.stdlib.stomp.StompConstants.*;
 
 /**
- * Initialize the Ack.
+ * Initialize the Acknowledge.
  *
  * @since 0.990.2
  */
@@ -63,7 +63,11 @@ public class Ack extends BlockingNativeCallableUnit {
                 System.out.println("Successfully acknowledged");
             } catch (StompException e) {
                 context.setReturnValues(StompUtils.getError(context, "Error on acknowledging the message"));
+            //
+            } catch (NullPointerException n){
+                context.setReturnValues(StompUtils.getError(context, "Null value found for Ack"));
             }
+            //
         }
     }
 }

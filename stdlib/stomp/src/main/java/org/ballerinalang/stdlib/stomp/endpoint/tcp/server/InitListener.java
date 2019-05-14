@@ -71,7 +71,9 @@ public class InitListener extends BlockingNativeCallableUnit {
 
             DefaultStompClient client = new DefaultStompClient(new URI(connectionURI));
             connection.addNativeData(CONFIG_FIELD_CLIENT_OBJ, client);
-
+            //
+            connection.addNativeData(CONFIG_FIELD_LOGIN,this.userLogin);
+            //
             context.setReturnValues();
         } catch (URISyntaxException e) {
             context.setReturnValues(StompUtils.getError(context, e));
@@ -81,33 +83,39 @@ public class InitListener extends BlockingNativeCallableUnit {
     public void validateURI(Context context) {
         BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
 
-        // TODO try to get rid the port by introducing only host with ex: tcp//localhost:61613
-        BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
-        if (login != null) {
-            this.userLogin = String.valueOf(login);
-        } else {
-            log.error("Login field is null");
-        }
+        try {
+            // TODO try to get rid the port by introducing only host with ex: tcp//localhost:61613
+//            BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
+//            if (login != null) {
+//                this.userLogin = String.valueOf(login);
+//            } else {
+//                log.error("Login field is null");
+//            }
+            this.userLogin = String.valueOf(endpointConfig.get(CONFIG_FIELD_LOGIN));
 
-        BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
-        if (passcode != null) {
-            this.userPasscode = String.valueOf(passcode);
-        } else {
-            log.error("Passcode field is null");
-        }
 
-        BString host = (BString) endpointConfig.get(CONFIG_FIELD_HOST);
-        if (host != null) {
-            this.hostName = String.valueOf(host);
-        } else {
-            log.error("Host field is null");
-        }
+            BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
+            if (passcode != null) {
+                this.userPasscode = String.valueOf(passcode);
+            } else {
+                log.error("Passcode field is null");
+            }
 
-        BInteger port = (BInteger) endpointConfig.get(CONFIG_FIELD_PORT);
-        if (port != null) {
-            this.stompPort = Integer.parseInt(String.valueOf(port));
-        } else {
-            log.error("Port field is null");
+            BString host = (BString) endpointConfig.get(CONFIG_FIELD_HOST);
+            if (host != null) {
+                this.hostName = String.valueOf(host);
+            } else {
+                log.error("Host field is null");
+            }
+
+            BInteger port = (BInteger) endpointConfig.get(CONFIG_FIELD_PORT);
+            if (port != null) {
+                this.stompPort = Integer.parseInt(String.valueOf(port));
+            } else {
+                log.error("Port field is null");
+            }
+        } catch (NullPointerException n){
+            context.setReturnValues(StompUtils.getError(context, n));
         }
     }
 }
