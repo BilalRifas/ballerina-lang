@@ -83,14 +83,13 @@ public class InitListener extends BlockingNativeCallableUnit {
     public void validateURI(Context context) {
         BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
 
-        try {
             // TODO try to get rid the port by introducing only host with ex: tcp//localhost:61613
-//            BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
-//            if (login != null) {
-//                this.userLogin = String.valueOf(login);
-//            } else {
-//                log.error("Login field is null");
-//            }
+            BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
+            if (login != null) {
+                this.userLogin = String.valueOf(login);
+            } else {
+                log.error("Login field is null");
+            }
             this.userLogin = String.valueOf(endpointConfig.get(CONFIG_FIELD_LOGIN));
 
 
@@ -114,8 +113,5 @@ public class InitListener extends BlockingNativeCallableUnit {
             } else {
                 log.error("Port field is null");
             }
-        } catch (NullPointerException n){
-            context.setReturnValues(StompUtils.getError(context, n));
-        }
     }
 }
