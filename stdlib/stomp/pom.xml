@@ -25,7 +25,6 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>ballerina-stomp</artifactId>
     <packaging>jar</packaging>
     <name>Ballerina - Stomp</name>
@@ -50,12 +49,6 @@
             <groupId>org.ballerinalang</groupId>
             <artifactId>lib-creator</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.ballerinalang</groupId>-->
-<!--            <artifactId>ballerina-runtime</artifactId>-->
-<!--            <type>zip</type>-->
-<!--            <classifier>ballerina-binary-repo</classifier>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-socket</artifactId>
@@ -80,16 +73,16 @@
             <type>zip</type>
             <classifier>ballerina-binary-repo</classifier>
         </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-runtime-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-runtime-api</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.ballerinalang</groupId>-->
+<!--            <artifactId>ballerina-runtime-api</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.ballerinalang</groupId>-->
+<!--            <artifactId>ballerina-runtime-api</artifactId>-->
+<!--            <type>zip</type>-->
+<!--            <classifier>ballerina-binary-repo</classifier>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-utils</artifactId>
@@ -102,6 +95,14 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>ballerina/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

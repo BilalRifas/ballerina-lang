@@ -54,7 +54,6 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE
 public class Start implements NativeCallableUnit {
     private CountDownLatch countDownLatch = new CountDownLatch(1);
 
-
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
         try {

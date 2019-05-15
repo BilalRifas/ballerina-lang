@@ -1,7 +1,6 @@
 import ballerina/socket;
 import ballerina/io;
 import ballerina/log;
-import ballerina/runtime;
 import ballerina/system;
 
 # Configurations related to a STOMP connection
@@ -90,7 +89,7 @@ public remote function Sender.connect(ConnectionConfiguration stompConfig) retur
     }
     io:println("Successfully connected to stomp broker");
 
-    runtime:sleep(3000);
+    //runtime:sleep(3000);
     return;
 }
 
@@ -111,7 +110,7 @@ public remote function Sender.send(string message, string destination) returns e
     }
     io:println("Message: ", message ," is sent successfully");
 
-    runtime:sleep(3000);
+    //runtime:sleep(3000);
     return;
 }
 

@@ -127,7 +127,6 @@ public class DefaultStompClient extends StompClient {
         } catch (BallerinaConnectorException c) {
                 log.error("Error while executing onError resource", c);
         }
-
     }
 
     @Override

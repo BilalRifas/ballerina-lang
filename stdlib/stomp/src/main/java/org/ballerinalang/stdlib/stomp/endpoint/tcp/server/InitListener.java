@@ -71,9 +71,7 @@ public class InitListener extends BlockingNativeCallableUnit {
 
             DefaultStompClient client = new DefaultStompClient(new URI(connectionURI));
             connection.addNativeData(CONFIG_FIELD_CLIENT_OBJ, client);
-            //
-            connection.addNativeData(CONFIG_FIELD_LOGIN,this.userLogin);
-            //
+
             context.setReturnValues();
         } catch (URISyntaxException e) {
             context.setReturnValues(StompUtils.getError(context, e));
@@ -90,8 +88,7 @@ public class InitListener extends BlockingNativeCallableUnit {
             } else {
                 log.error("Login field is null");
             }
-            this.userLogin = String.valueOf(endpointConfig.get(CONFIG_FIELD_LOGIN));
-
+            //this.userLogin = String.valueOf(endpointConfig.get(CONFIG_FIELD_LOGIN));
 
             BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
             if (passcode != null) {
