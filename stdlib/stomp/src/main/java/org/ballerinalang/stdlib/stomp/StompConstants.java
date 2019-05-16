@@ -26,6 +26,8 @@ package org.ballerinalang.stdlib.stomp;
 public class StompConstants {
 
     public static final String STOMP_PACKAGE = "ballerina/stomp";
+    public static final String BALLERINA = "ballerina";
+    public static final String STOMP = "stomp";
 
     // Stomp configs fields
     public static final String CONFIG_FIELD_HOST = "host";
@@ -49,7 +51,6 @@ public class StompConstants {
     public static final String STOMP_MSG = "STOMPMSG";
     public static final String MSG_ID = "message-id";
     public static final String MESSAGE_OBJ = "Message";
-    public static final String STOMP_SERVICE_CONFIG = "ConsumerConfig";
 
     // Error related constants
     static final String STOMP_ERROR_CODE = "{ballerina/stomp}StompError";

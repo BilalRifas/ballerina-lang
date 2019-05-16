@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp;
+package org.ballerinalang.stdlib.stomp.message;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -25,30 +25,29 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
+import org.ballerinalang.stdlib.stomp.StompConstants;
+import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 /**
  * Initialize the Acknowledge.
  *
  * @since 0.995.0
  */
 @BallerinaFunction(
-        orgName = "ballerina",
-        packageName = "stomp",
+        orgName = StompConstants.BALLERINA,
+        packageName = StompConstants.STOMP,
         functionName = "ack",
-        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Message", structPackage = STOMP_PACKAGE),
+        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Message", structPackage = StompConstants.STOMP_PACKAGE),
         isPublic = true
 )
 
-public class Ack extends BlockingNativeCallableUnit {
+public class Acknowledge extends BlockingNativeCallableUnit {
     private static String ackMode = "auto";
-    private static final Logger log = LoggerFactory.getLogger(Ack.class);
+    private static final Logger log = LoggerFactory.getLogger(Acknowledge.class);
 
     public static void setAckMode(String ackMode) {
-        Ack.ackMode = ackMode;
+        Acknowledge.ackMode = ackMode;
     }
 
     @Override
@@ -58,14 +57,14 @@ public class Ack extends BlockingNativeCallableUnit {
         DefaultStompClient client = (DefaultStompClient) message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
         BValue messageId = message.get(StompConstants.MSG_ID);
 
-        if (Ack.ackMode.equals("auto")) {
+        if (Acknowledge.ackMode.equals("auto")) {
             // Do nothing
-        } else if (Ack.ackMode.equals("client")) {
+        } else if (Acknowledge.ackMode.equals("client")) {
             try {
                 client.ack(String.valueOf(messageId));
                 log.debug("Successfully acknowledged");
             } catch (StompException e) {
-                context.setReturnValues(StompUtils.getError(context, "Error on acknowledging the message"));
+                context.setReturnValues(StompUtils.getError(context, e));
             }
         }
     }

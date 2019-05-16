@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
+package org.ballerinalang.stdlib.stomp.externimpl.consumer;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -27,31 +27,24 @@ import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.stdlib.stomp.DefaultStompClient;
+import org.ballerinalang.stdlib.stomp.StompConstants;
 import org.ballerinalang.stdlib.stomp.StompUtils;
+import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_HOST;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_LOGIN;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PASSCODE;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PORT;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 /**
  * Initialize the server stomp endpoint.
  *
  * @since 0.995.0
  */
 @BallerinaFunction(
-        orgName = "ballerina",
-        packageName = "stomp",
+        orgName = StompConstants.BALLERINA,
+        packageName = StompConstants.STOMP,
         functionName = "initListener",
-        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Listener", structPackage = STOMP_PACKAGE),
+        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Listener", structPackage = StompConstants.STOMP_PACKAGE),
         isPublic = true
 )
 public class InitListener extends BlockingNativeCallableUnit {
@@ -71,7 +64,7 @@ public class InitListener extends BlockingNativeCallableUnit {
                     "@" + InitListener.hostName + ":" + InitListener.stompPort;
 
             DefaultStompClient client = new DefaultStompClient(new URI(connectionURI));
-            connection.addNativeData(CONFIG_FIELD_CLIENT_OBJ, client);
+            connection.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, client);
 
             context.setReturnValues();
         } catch (URISyntaxException e) {
@@ -82,29 +75,28 @@ public class InitListener extends BlockingNativeCallableUnit {
     private void validateURI(Context context) {
         BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
 
-            // TODO try to get rid the port by introducing only host with ex: tcp//localhost:61613
-            BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
+            BString login = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_LOGIN);
             if (login != null) {
                 InitListener.userLogin = String.valueOf(login);
             } else {
                 log.error("Login field is null");
             }
 
-            BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
+            BString passcode = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_PASSCODE);
             if (passcode != null) {
                 InitListener.userPasscode = String.valueOf(passcode);
             } else {
                 log.error("Passcode field is null");
             }
 
-            BString host = (BString) endpointConfig.get(CONFIG_FIELD_HOST);
+            BString host = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_HOST);
             if (host != null) {
                 InitListener.hostName = String.valueOf(host);
             } else {
                 log.error("Host field is null");
             }
 
-            BInteger port = (BInteger) endpointConfig.get(CONFIG_FIELD_PORT);
+            BInteger port = (BInteger) endpointConfig.get(StompConstants.CONFIG_FIELD_PORT);
             if (port != null) {
                 InitListener.stompPort = Integer.parseInt(String.valueOf(port));
             } else {

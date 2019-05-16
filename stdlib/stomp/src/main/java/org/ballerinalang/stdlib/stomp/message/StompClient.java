@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp;
+package org.ballerinalang.stdlib.stomp.message;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +26,6 @@ import java.net.URISyntaxException;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-
 /**
  * Stomp Client.
  *

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp;
+package org.ballerinalang.stdlib.stomp.message;
 
 import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
@@ -31,6 +31,8 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.services.ErrorHandlerUtils;
+import org.ballerinalang.stdlib.stomp.StompConstants;
+import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.ballerinalang.util.codegen.ProgramFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,16 +41,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
-import static org.ballerinalang.stdlib.stomp.StompConstants.MESSAGE_OBJ;
-import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_CONTENT_NAME;
-import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_DESTINATION;
-import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_ID;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MESSAGE;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MSG;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 /**
  * Extended DefaultStompClient of StompClient.
  *
@@ -96,18 +88,18 @@ public class DefaultStompClient extends StompClient {
         extractResource(service);
         ProgramFile programFile = this.onMessageResource.getResourceInfo().getPackageInfo().getProgramFile();
 
-        BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile, STOMP_PACKAGE, MESSAGE_OBJ);
+        BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile, StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
         List<ParamDetail> paramDetails = this.onMessageResource.getParamDetails();
         String callerType = paramDetails.get(0).getVarType().toString();
         if (callerType.equals("string")) {
             Executor.submit(this.onMessageResource, new ResponseCallback(),
                     new HashMap<>(), null, new BString(body));
         } else if (callerType.equals("ballerina/stomp:Message")) {
-            msgObj.addNativeData(STOMP_MSG, body);
-            msgObj.put(MSG_CONTENT_NAME, new BString(body));
-            msgObj.put(MSG_DESTINATION, new BString(destination));
-            msgObj.put(MSG_ID, new BString(messageId));
-            msgObj.addNativeData(CONFIG_FIELD_CLIENT_OBJ, this);
+            msgObj.addNativeData(StompConstants.STOMP_MSG, body);
+            msgObj.put(StompConstants.MSG_CONTENT_NAME, new BString(body));
+            msgObj.put(StompConstants.MSG_DESTINATION, new BString(destination));
+            msgObj.put(StompConstants.MSG_ID, new BString(messageId));
+            msgObj.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, this);
             Executor.submit(this.onMessageResource, new ResponseCallback(),
                     new HashMap<>(), null, msgObj);
         }
@@ -173,9 +165,9 @@ public class DefaultStompClient extends StompClient {
     private BValue getErrorSignatureParameters(Resource onErrorResource, String errorMessage) {
         ProgramFile programFile = onErrorResource.getResourceInfo().getPackageInfo().getProgramFile();
         BMap<String, BValue> messageObj = BLangConnectorSPIUtil.createBStruct(
-                programFile, STOMP_PACKAGE, MESSAGE_OBJ);
+                programFile, StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
         BError error = StompUtils.createStompError(programFile, errorMessage);
-        messageObj.addNativeData(STOMP_MESSAGE, errorMessage);
+        messageObj.addNativeData(StompConstants.STOMP_MESSAGE, errorMessage);
         return error;
     }
 }

@@ -16,12 +16,13 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp;
+package org.ballerinalang.stdlib.stomp.message;
+
+import org.ballerinalang.stdlib.stomp.message.StompCommand;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-
 /**
  * Stomp server frame creation.
  *

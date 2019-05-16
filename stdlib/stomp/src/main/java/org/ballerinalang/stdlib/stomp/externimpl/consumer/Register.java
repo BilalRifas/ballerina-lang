@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
+package org.ballerinalang.stdlib.stomp.externimpl.consumer;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -29,32 +29,28 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.stdlib.stomp.DefaultStompClient;
+import org.ballerinalang.stdlib.stomp.StompConstants;
+import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Locale;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_DESTINATION;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 /**
  * Register stomp listener service.
  *
  * @since 0.995.0
  */
-@BallerinaFunction(orgName = "ballerina",
-        packageName = "stomp",
+@BallerinaFunction(
+        orgName = StompConstants.BALLERINA,
+        packageName = StompConstants.STOMP,
         functionName = "register",
         receiver = @Receiver(type = TypeKind.OBJECT,
                 structType = "Listener",
-                structPackage = STOMP_PACKAGE), isPublic = true)
+                structPackage = StompConstants.STOMP_PACKAGE), isPublic = true)
 public class Register extends BlockingNativeCallableUnit {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
+    private static final Logger log = LoggerFactory.getLogger(Register.class);
     @Override
     public void execute(Context context) {
         BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
@@ -63,12 +59,12 @@ public class Register extends BlockingNativeCallableUnit {
         Service service = BLangConnectorSPIUtil.getServiceRegistered(context);
         Annotation serviceAnnotation = getServiceConfigAnnotation(service);
         Struct annotationValue = serviceAnnotation.getValue();
-        String destination = annotationValue.getStringField(CONFIG_FIELD_DESTINATION);
-        String ackMode = annotationValue.getStringField(CONFIG_FIELD_ACKMODE);
+        String destination = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DESTINATION);
+        String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
         if (ackMode != null) {
             String strLowerAck = ackMode.toLowerCase(Locale.ENGLISH);
             if (strLowerAck.equals("auto") || strLowerAck.equals("client") || strLowerAck.equals("client-individual")) {
-                connection.addNativeData(CONFIG_FIELD_ACKMODE, strLowerAck);
+                connection.addNativeData(StompConstants.CONFIG_FIELD_ACKMODE, strLowerAck);
             } else {
                 log.error("Ack Mode is not supported");
             }
@@ -77,14 +73,14 @@ public class Register extends BlockingNativeCallableUnit {
         }
 
         if (destination != null) {
-            connection.addNativeData(CONFIG_FIELD_DESTINATION, destination);
+            connection.addNativeData(StompConstants.CONFIG_FIELD_DESTINATION, destination);
         } else {
             log.error("Destination is null");
         }
 
         // Get stompClient object created in intListener
         DefaultStompClient client = (DefaultStompClient)
-                connection.getNativeData(CONFIG_FIELD_CLIENT_OBJ);
+                connection.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
 
         client.registerService(service, destination);
         context.setReturnValues();
@@ -92,7 +88,7 @@ public class Register extends BlockingNativeCallableUnit {
 
     private Annotation getServiceConfigAnnotation(Service service) {
         List<Annotation> annotationList = service
-                .getAnnotationList(STOMP_PACKAGE,
+                .getAnnotationList(StompConstants.STOMP_PACKAGE,
                         "ServiceConfig");
 
         if (annotationList == null) {

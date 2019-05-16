@@ -16,27 +16,17 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp;
-
-import org.ballerinalang.util.exceptions.BallerinaException;
+package org.ballerinalang.stdlib.stomp.message;
 
 /**
- * Stomp exception.
+ * Each Stomp commands.
  *
  * @since 0.995.0
  */
-public class StompException extends BallerinaException {
+enum StompCommand {
+// client-commands
+CONNECT, SEND, SUBSCRIBE, UNSUBSCRIBE, BEGIN, COMMIT, ABORT, ACK, DISCONNECT,
 
-    private static final long serialVersionUID = 5475019401678519895L;
-    private String message;
-
-    public StompException(String message) {
-        super(message);
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
+// server-commands
+CONNECTED, MESSAGE, RECEIPT, ERROR, DISCONNECTED
 }

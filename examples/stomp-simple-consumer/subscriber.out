@@ -1,0 +1,6 @@
+# To run the client, navigate to the directory that contains the
+# `.bal` file and use the `ballerina run ` command.
+$ ballerina run subscriber.bal
+
+2019-05-17 00:02:47,829 INFO  [] - Hello World From Ballerina 
+

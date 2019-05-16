@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
+package org.ballerinalang.stdlib.stomp.externimpl.consumer;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
@@ -27,30 +27,25 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.stdlib.stomp.Ack;
-import org.ballerinalang.stdlib.stomp.DefaultStompClient;
-import org.ballerinalang.stdlib.stomp.StompException;
-import org.ballerinalang.stdlib.stomp.StompUtils;
+import org.ballerinalang.stdlib.stomp.*;
+import org.ballerinalang.stdlib.stomp.message.Acknowledge;
+import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
+import org.ballerinalang.stdlib.stomp.message.StompException;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
-import static org.ballerinalang.stdlib.stomp.StompConstants.COUNTDOWN_LATCH;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 /**
  * Start server stomp listener.
  *
  * @since 0.995.0
  */
-@BallerinaFunction(orgName = "ballerina",
-        packageName = "stomp",
+@BallerinaFunction(
+        orgName = StompConstants.BALLERINA,
+        packageName = StompConstants.STOMP,
         functionName = "start",
         receiver = @Receiver(type = TypeKind.OBJECT,
                 structType = "Listener",
-                structPackage = STOMP_PACKAGE),
+                structPackage = StompConstants.STOMP_PACKAGE),
         isPublic = true
 )
 public class Start implements NativeCallableUnit {
@@ -60,15 +55,15 @@ public class Start implements NativeCallableUnit {
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
         try {
             BMap<String, BValue> start = (BMap<String, BValue>) context.getRefArgument(0);
-            start.addNativeData(COUNTDOWN_LATCH, countDownLatch);
+            start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
 
-            String ackMode = (String) start.getNativeData(CONFIG_FIELD_ACKMODE);
+            String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
 
-            Ack ack = new Ack();
+            Acknowledge ack = new Acknowledge();
             ack.setAckMode(ackMode);
 
             // get stompClient object created in intListener
-            DefaultStompClient client = (DefaultStompClient) start.getNativeData(CONFIG_FIELD_CLIENT_OBJ);
+            DefaultStompClient client = (DefaultStompClient) start.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
 
             client.setCallableUnit(callableUnitCallback);
 

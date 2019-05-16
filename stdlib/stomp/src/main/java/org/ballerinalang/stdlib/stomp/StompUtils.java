@@ -27,9 +27,6 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.util.codegen.ProgramFile;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-
 /**
  * Utility class for Stomp.
  *
@@ -55,7 +52,7 @@ public class StompUtils {
     }
 
     private static BMap<String, BValue> createStompErrorRecord(Context context) {
-        return BLangConnectorSPIUtil.createBStruct(context, STOMP_PACKAGE,
+        return BLangConnectorSPIUtil.createBStruct(context, StompConstants.STOMP_PACKAGE,
                 StompConstants.STOMP_ERROR_RECORD);
     }
 
@@ -67,9 +64,9 @@ public class StompUtils {
         }
     }
 
-    static BError createStompError(ProgramFile programFile, String errMsg) {
+    public static BError createStompError(ProgramFile programFile, String errMsg) {
         BMap<String, BValue> errorRecord = BLangConnectorSPIUtil
-                .createBStruct(programFile, STOMP_PACKAGE, STOMP_ERROR);
+                .createBStruct(programFile, StompConstants.STOMP_PACKAGE, STOMP_ERROR);
         errorRecord.put("message", new BString(errMsg));
         return BLangVMErrors.createError(STOMP_ERROR_CODE, errorRecord);
     }
