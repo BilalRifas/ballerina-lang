@@ -88,7 +88,8 @@ public class DefaultStompClient extends StompClient {
         extractResource(service);
         ProgramFile programFile = this.onMessageResource.getResourceInfo().getPackageInfo().getProgramFile();
 
-        BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile, StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
+        BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile,
+                StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
         List<ParamDetail> paramDetails = this.onMessageResource.getParamDetails();
         String callerType = paramDetails.get(0).getVarType().toString();
         if (callerType.equals("string")) {

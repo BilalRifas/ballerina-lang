@@ -27,7 +27,8 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.stdlib.stomp.*;
+import org.ballerinalang.stdlib.stomp.StompConstants;
+import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.ballerinalang.stdlib.stomp.message.Acknowledge;
 import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
 import org.ballerinalang.stdlib.stomp.message.StompException;
@@ -63,7 +64,8 @@ public class Start implements NativeCallableUnit {
             ack.setAckMode(ackMode);
 
             // get stompClient object created in intListener
-            DefaultStompClient client = (DefaultStompClient) start.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
+            DefaultStompClient client = (DefaultStompClient)
+                    start.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
 
             client.setCallableUnit(callableUnitCallback);
 

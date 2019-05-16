@@ -44,7 +44,8 @@ import java.net.URISyntaxException;
         orgName = StompConstants.BALLERINA,
         packageName = StompConstants.STOMP,
         functionName = "initListener",
-        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Listener", structPackage = StompConstants.STOMP_PACKAGE),
+        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Listener",
+                structPackage = StompConstants.STOMP_PACKAGE),
         isPublic = true
 )
 public class InitListener extends BlockingNativeCallableUnit {

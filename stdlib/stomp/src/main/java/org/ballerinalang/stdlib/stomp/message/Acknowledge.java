@@ -38,7 +38,8 @@ import org.slf4j.LoggerFactory;
         orgName = StompConstants.BALLERINA,
         packageName = StompConstants.STOMP,
         functionName = "ack",
-        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Message", structPackage = StompConstants.STOMP_PACKAGE),
+        receiver = @Receiver(type = TypeKind.OBJECT, structType = "Message",
+                structPackage = StompConstants.STOMP_PACKAGE),
         isPublic = true
 )
 
@@ -54,7 +55,8 @@ public class Acknowledge extends BlockingNativeCallableUnit {
     public void execute(Context context) {
         @SuppressWarnings(StompConstants.UNCHECKED)
         BMap<String, BValue> message = (BMap<String, BValue>) context.getRefArgument(0);
-        DefaultStompClient client = (DefaultStompClient) message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
+        DefaultStompClient client = (DefaultStompClient)
+                message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
         BValue messageId = message.get(StompConstants.MSG_ID);
 
         if (Acknowledge.ackMode.equals("auto")) {
