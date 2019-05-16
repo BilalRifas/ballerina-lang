@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -45,7 +45,7 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_
 /**
  * Initialize the server stomp endpoint.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 @BallerinaFunction(
         orgName = "ballerina",
@@ -67,7 +67,8 @@ public class InitListener extends BlockingNativeCallableUnit {
             BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
 
             this.validateURI(context);
-            String connectionURI = "tcp://" + this.userLogin + ":" + this.userPasscode + "@" + this.hostName + ":" + this.stompPort;
+            String connectionURI = "tcp://" + this.userLogin + ":" + this.userPasscode +
+                    "@" + this.hostName + ":" + this.stompPort;
 
             DefaultStompClient client = new DefaultStompClient(new URI(connectionURI));
             connection.addNativeData(CONFIG_FIELD_CLIENT_OBJ, client);
@@ -88,7 +89,6 @@ public class InitListener extends BlockingNativeCallableUnit {
             } else {
                 log.error("Login field is null");
             }
-            //this.userLogin = String.valueOf(endpointConfig.get(CONFIG_FIELD_LOGIN));
 
             BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
             if (passcode != null) {

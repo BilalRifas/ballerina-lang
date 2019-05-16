@@ -37,7 +37,7 @@ public type Sender client object {
         acceptVersion:acceptVersion
     };
 
-    public function __init(ConnectionConfiguration stompConfig) returns error? {
+    public function __init(ConnectionConfiguration stompConfig){
         self.config = stompConfig;
         self.host = stompConfig.host;
         self.port = stompConfig.port;
@@ -89,7 +89,6 @@ public remote function Sender.connect(ConnectionConfiguration stompConfig) retur
     }
     io:println("Successfully connected to stomp broker");
 
-    //runtime:sleep(3000);
     return;
 }
 
@@ -110,7 +109,6 @@ public remote function Sender.send(string message, string destination) returns e
     }
     io:println("Message: ", message ," is sent successfully");
 
-    //runtime:sleep(3000);
     return;
 }
 

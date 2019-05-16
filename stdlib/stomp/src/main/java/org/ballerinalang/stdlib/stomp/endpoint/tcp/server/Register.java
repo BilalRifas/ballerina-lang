@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,6 +18,7 @@
 
 package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
 
+import java.util.List;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.connector.api.*;
@@ -27,17 +28,19 @@ import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.stdlib.stomp.DefaultStompClient;
+import org.ballerinalang.util.exceptions.BallerinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-import static org.ballerinalang.stdlib.stomp.StompConstants.*;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_DESTINATION;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
 
 /**
  * Register stomp listener service.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 @BallerinaFunction(orgName = "ballerina",
         packageName = "stomp",
@@ -68,7 +71,7 @@ public class Register extends BlockingNativeCallableUnit {
         }
 
         if (strLowerAck != null) {
-            if (strLowerAck.equals("auto") | strLowerAck.equals("client") | strLowerAck.equals("client-individual")) {
+            if (strLowerAck.equals("auto") || strLowerAck.equals("client") || strLowerAck.equals("client-individual")) {
                 connection.addNativeData(CONFIG_FIELD_ACKMODE, strLowerAck);
             } else {
                 log.error("Ack Mode is not supported");
@@ -82,7 +85,6 @@ public class Register extends BlockingNativeCallableUnit {
                 connection.getNativeData(CONFIG_FIELD_CLIENT_OBJ);
 
         client.registerService(service, destination);
-
         context.setReturnValues();
     }
 

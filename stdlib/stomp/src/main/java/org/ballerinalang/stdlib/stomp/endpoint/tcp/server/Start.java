@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -35,13 +35,15 @@ import org.ballerinalang.stdlib.stomp.StompUtils;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.*;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
+import static org.ballerinalang.stdlib.stomp.StompConstants.COUNTDOWN_LATCH;
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
 
 /**
  * Start server stomp listener.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 @BallerinaFunction(orgName = "ballerina",
         packageName = "stomp",
@@ -74,23 +76,13 @@ public class Start implements NativeCallableUnit {
             client.connect();
 
             // Change variable name to destination Map or something
-            Map<String, Service> subMapDestination = client.getDestinationValue();
+            Map<String, Service> subMapDestination = client.getServiceRegistryMap();
             for (Map.Entry<String, Service> entry : subMapDestination.entrySet()) {
                 String subscribeDestination = entry.getKey();
 
                 // Keeps on waiting for the connected flag, once connected is made it should subscribe on queue.
-                int count = 0;
-                int maxTries = 3;
-                while (client.isConnected()) {
-                    {
-                        try {
-                            client.subscribe(subscribeDestination, ackMode);
-                        } catch (StompException e) {
-                            // handle exception
-                            if (++count == maxTries) throw e;
-                        }
-                    }
-
+                if (client.isConnected()) {
+                    client.subscribe(subscribeDestination, ackMode);
                 }
             }
 

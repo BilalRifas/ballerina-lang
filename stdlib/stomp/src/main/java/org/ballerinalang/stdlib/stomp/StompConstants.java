@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,9 +19,9 @@
 package org.ballerinalang.stdlib.stomp;
 
 /**
- * Initialize the server stomp endpoint.
+ * Stomp constants.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 public class StompConstants {
 
@@ -49,6 +49,7 @@ public class StompConstants {
     public static final String STOMP_MSG = "STOMPMSG";
     public static final String MSG_ID = "message-id";
     public static final String MESSAGE_OBJ = "Message";
+    public static final String STOMP_SERVICE_CONFIG = "ConsumerConfig";
 
     // Error related constants
     static final String STOMP_ERROR_CODE = "{ballerina/stomp}StompError";

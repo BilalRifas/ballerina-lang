@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -29,9 +29,9 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
- * Initialize the server stomp endpoint.
+ * Stomp Client.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 public abstract class StompClient {
     private final URI uri;

@@ -11,10 +11,6 @@ stomp:Sender stompSender = new({
     });
 
 public function main() {
-    // Message is published within the transaction block.
-    // Each message sent should be received from other end else rollback
-    // to retry the message along with transaction Id.
-
         // This sends the Ballerina message to the stomp broker.
         string message1 = "Hello World From Ballerina - 1";
         string message2 = "Hello World From Ballerina - 2";

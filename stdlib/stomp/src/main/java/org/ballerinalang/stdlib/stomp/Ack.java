@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,13 +25,15 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.*;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
  * Initialize the Acknowledge.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 @BallerinaFunction(
         orgName = "ballerina",
@@ -43,6 +45,7 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.*;
 
 public class Ack extends BlockingNativeCallableUnit {
     public static String ackMode;
+    private static final Logger log = LoggerFactory.getLogger(Ack.class);
 
     public void setAckMode(String ackMode) {
         this.ackMode = ackMode;
@@ -55,19 +58,15 @@ public class Ack extends BlockingNativeCallableUnit {
         DefaultStompClient client = (DefaultStompClient) message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
         BValue messageId = message.get(StompConstants.MSG_ID);
 
-        if (this.ackMode.equals("auto")|this.ackMode.equals(null)) {
+        if (this.ackMode.equals("auto") || this.ackMode.equals(null)) {
             // Do nothing
         } else if (this.ackMode.equals("client")) {
             try {
                 client.ack(String.valueOf(messageId));
-                System.out.println("Successfully acknowledged");
+                log.debug("Successfully acknowledged");
             } catch (StompException e) {
                 context.setReturnValues(StompUtils.getError(context, "Error on acknowledging the message"));
-            //
-            } catch (NullPointerException n){
-                context.setReturnValues(StompUtils.getError(context, "Null value found for Ack"));
             }
-            //
         }
     }
 }

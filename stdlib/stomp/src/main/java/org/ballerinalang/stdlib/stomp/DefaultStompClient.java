@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -35,18 +35,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.*;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.MESSAGE_OBJ;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MSG;
+import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_CONTENT_NAME;
+import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_DESTINATION;
+import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_ID;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MESSAGE;
 
 /**
- * Register stomp listener service.
+ * Extended DefaultStompClient of StompClient.
  *
- * @since 0.990.2
+ * @since 0.995.0
  */
 public class DefaultStompClient extends StompClient {
+    private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
     private CallableUnitCallback callableUnit;
     private Map<String, Service> serviceRegistry = new HashMap<>();
     private boolean connected;
-    private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
+    private Resource onMessageResource;
+    private Resource onErrorResource;
+    private String destination;
 
     public DefaultStompClient(URI uri) {
         super(uri);
@@ -61,7 +71,7 @@ public class DefaultStompClient extends StompClient {
         }
     }
 
-    public boolean isConnected(){
+    public boolean isConnected() {
         return this.connected;
     }
 
@@ -75,24 +85,28 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onMessage(String messageId, String body, String destination) {
-            Resource messageResource = getMessageResource();
-            ProgramFile programFile = messageResource.getResourceInfo().getPackageInfo().getProgramFile();
-            BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile, STOMP_PACKAGE, MESSAGE_OBJ);
-            List<ParamDetail> paramDetails = messageResource.getParamDetails();
-            String callerType = paramDetails.get(0).getVarType().toString();
+        Service service = this.serviceRegistry.get(destination);
+        this.destination = destination;
+        extractResource(service);
+        ProgramFile programFile = this.onMessageResource.getResourceInfo().getPackageInfo().getProgramFile();
 
-            if (callerType.equals("string")) {
-                    Executor.submit(messageResource, new ResponseCallback(body, messageId), new HashMap<>(), null, new BString(body));
-            } else if (callerType.equals("ballerina/stomp:Message")) {
-                    msgObj.addNativeData(STOMP_MSG, body);
-                    msgObj.put(MSG_CONTENT_NAME, new BString(body));
-                    msgObj.put(MSG_DESTINATION, new BString(destination));
-                    msgObj.put(MSG_ID, new BString(messageId));
-                    msgObj.addNativeData(CONFIG_FIELD_CLIENT_OBJ, this);
-                    Executor.submit(messageResource, new ResponseCallback(body, messageId), new HashMap<>(), null, msgObj);
-            }
-
+        BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile, STOMP_PACKAGE, MESSAGE_OBJ);
+        List<ParamDetail> paramDetails = this.onMessageResource.getParamDetails();
+        String callerType = paramDetails.get(0).getVarType().toString();
+        if (callerType.equals("string")) {
+            Executor.submit(this.onMessageResource, new ResponseCallback(body, messageId),
+                    new HashMap<>(), null, new BString(body));
+        } else if (callerType.equals("ballerina/stomp:Message")) {
+            msgObj.addNativeData(STOMP_MSG, body);
+            msgObj.put(MSG_CONTENT_NAME, new BString(body));
+            msgObj.put(MSG_DESTINATION, new BString(destination));
+            msgObj.put(MSG_ID, new BString(messageId));
+            msgObj.addNativeData(CONFIG_FIELD_CLIENT_OBJ, this);
+            Executor.submit(this.onMessageResource, new ResponseCallback(body, messageId),
+                    new HashMap<>(), null, msgObj);
+        }
     }
+
 
     private class ResponseCallback implements CallableUnitCallback {
         private String message;
@@ -114,67 +128,50 @@ public class DefaultStompClient extends StompClient {
         }
     }
 
+    // When STOMP broker sends an acknowledgement receipt onReceipt will get triggered.
     @Override
     public void onReceipt(String receiptId) {
     }
 
     @Override
     public void onError(String message, String description) {
-        Resource errorResource = getErrorResource();
+        Service service = this.serviceRegistry.get(destination);
+        extractResource(service);
         try {
-            Executor.submit(errorResource, new ResponseCallback(message, description),
-                        null, null, getErrorSignatureParameters(errorResource, message));
+            Executor.submit( this.onErrorResource, new ResponseCallback(message, description),
+                    null, null, getErrorSignatureParameters(this.onErrorResource, description));
         } catch (BallerinaConnectorException c) {
-                log.error("Error while executing onError resource", c);
+            log.error("Error while executing onError resource", c);
         }
+
     }
 
     @Override
     public void onCriticalError(Exception e) {
-        System.out.println("Error: " + e);
+        log.error("Error: ", e);
     }
 
     public void registerService(Service service, String destination) {
         this.serviceRegistry.put(destination, service);
     }
 
-    public Map getDestinationValue() {
+    public Map getServiceRegistryMap() {
         return this.serviceRegistry;
     }
 
-    public Resource getMessageResource(){
-        Service subscriberService = this.serviceRegistry.get("destination");
-        Resource msgResource = null;
-        int count;
-        for (count = 0; count < subscriberService.getResources().length; count++) {
-            // Accessing each element of array
-            String resourceName = subscriberService.getResources()[count].getName();
-            if (resourceName.equals("onMessage")) {
-                Resource onMessageResource = subscriberService.getResources()[count];
-                if (onMessageResource != null) {
-                    msgResource = onMessageResource;
-                }
-            }
-        }
-        return msgResource;
-    }
+    public void extractResource(Service service) {
 
-    public Resource getErrorResource(){
-        // Get service resources by iterating
-        Service subService = this.serviceRegistry.get("destination");
-        Resource errResource = null;
         int count;
-        for (count = 0; count < subService.getResources().length; count++) {
+        for (count = 0; count < service.getResources().length; count++) {
             // Accessing each element of array
-            String resourceName = subService.getResources()[count].getName();
+            String resourceName = service.getResources()[count].getName();
+            if (resourceName.equals("onMessage")) {
+                this.onMessageResource = service.getResources()[count];
+            }
             if (resourceName.equals("onError")) {
-                Resource onErrorResource = subService.getResources()[count];
-                if (onErrorResource != null) {
-                    errResource = onErrorResource;
-                }
+                this.onErrorResource = service.getResources()[count];
             }
         }
-        return errResource;
     }
 
     private BValue getErrorSignatureParameters(Resource onErrorResource, String errorMessage) {

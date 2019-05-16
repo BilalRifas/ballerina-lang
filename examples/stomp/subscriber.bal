@@ -51,7 +51,6 @@ service stompListener2 on consumerEndpoint  {
         //log:printInfo(payload);
         log:printInfo("stompListener 2");
         log:printInfo(content);
-
         var messageAck = message.ack();
     }
 
@@ -60,5 +59,3 @@ service stompListener2 on consumerEndpoint  {
         log:printError("An error occured", err = er);
     }
 }
-
-

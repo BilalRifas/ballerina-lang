@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,12 +27,13 @@ import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.util.codegen.ProgramFile;
-import org.ballerinalang.util.exceptions.BallerinaException;
 
 import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
  * Utility class for Stomp.
+ *
+ * @since 0.995.0
  */
 public class StompUtils {
 
@@ -40,11 +41,9 @@ public class StompUtils {
     private static final String STOMP_ERROR = "StompError";
 
     /**
-     * Get error struct.
-     *
+     * GetError
      * @param context Represent ballerina context
      * @param errMsg  Error message
-     * @return Error struct
      */
     public static BError getError(Context context, String errMsg) {
         BMap<String, BValue> stompErrorRecord = createStompErrorRecord(context);
