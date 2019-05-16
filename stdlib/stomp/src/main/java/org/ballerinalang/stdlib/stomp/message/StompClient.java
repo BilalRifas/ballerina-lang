@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -195,6 +196,7 @@ public abstract class StompClient {
         send(frame);
     }
 
+    // Acknowledge message with transaction.
     public void ack(String messageId, String transaction) {
         StompFrame frame = new StompFrame(StompCommand.ACK);
         frame.header.put("message-id", messageId);
@@ -210,6 +212,19 @@ public abstract class StompClient {
             ex.initCause(e);
             throw ex;
         }
+    }
+
+    // Durable subscribe
+    public void durableSubscribe(String destination, String ack) {
+        StompFrame frame = new StompFrame(StompCommand.SUBSCRIBE);
+        frame.header.put("destination", destination);
+        frame.header.put("session", sessionId);
+        frame.header.put("ack", ack);
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        frame.header.put("id", uuid);
+        frame.header.put("durable", "true");
+        frame.header.put("auto-delete:", "false");
+        send(frame);
     }
 
 }

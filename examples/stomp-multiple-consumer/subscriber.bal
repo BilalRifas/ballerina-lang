@@ -26,7 +26,6 @@ service stompListenerSports on consumerEndpoint  {
         var content = message.getContent();
         log:printInfo("StompListener Sports");
         log:printInfo(content);
-        var messageAck = message.ack();
     }
 
     // // This resource is invoked when the connection is interrupted.
@@ -47,7 +46,6 @@ service stompListenerNews on consumerEndpoint  {
         var content = message.getContent();
         log:printInfo("StompListener News");
         log:printInfo(content);
-        var messageAck = message.ack();
     }
 
     // // This resource is invoked when the connection is interrupted.

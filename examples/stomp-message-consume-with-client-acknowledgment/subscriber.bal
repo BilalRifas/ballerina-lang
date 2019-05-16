@@ -15,7 +15,7 @@ listener stomp:Listener consumerEndpoint = new({
 // Add service config
 @stomp:ServiceConfig{
         destination:"/queue/sports",
-        ackMode:"AUTO"
+        ackMode:"CLIENT"
 }
 
 // This binds the created consumer to the listener service.
@@ -25,6 +25,7 @@ service stompListenerSports on consumerEndpoint  {
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
         log:printInfo(content);
+        var messageAck = message.ack();
     }
 
     // // This resource is invoked when the connection is interrupted.
