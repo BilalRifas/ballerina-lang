@@ -1,3 +1,4 @@
+// This is the publisher implementation for STOMP protocol.
 import ballerina/stomp;
 
 // This initializes a STOMP connection with the STOMP broker.
@@ -16,6 +17,6 @@ public function main() {
         string message2 = "Hello World From Ballerina - 2";
         string destination1 = "/queue/test";
         string destination2 = "/queue/new";
-        var broadcast1 = stompSender->send(message1,destination1);
-        var broadcast2 = stompSender->send(message2,destination2);
+        var publish1 = stompSender->send(message1,destination1);
+        var publish2 = stompSender->send(message2,destination2);
 }

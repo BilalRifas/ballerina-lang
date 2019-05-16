@@ -44,11 +44,11 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 )
 
 public class Ack extends BlockingNativeCallableUnit {
-    public static String ackMode;
+    private static String ackMode = "auto";
     private static final Logger log = LoggerFactory.getLogger(Ack.class);
 
-    public void setAckMode(String ackMode) {
-        this.ackMode = ackMode;
+    public static void setAckMode(String ackMode) {
+        Ack.ackMode = ackMode;
     }
 
     @Override
@@ -58,9 +58,9 @@ public class Ack extends BlockingNativeCallableUnit {
         DefaultStompClient client = (DefaultStompClient) message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
         BValue messageId = message.get(StompConstants.MSG_ID);
 
-        if (this.ackMode.equals("auto") || this.ackMode.equals(null)) {
+        if (Ack.ackMode.equals("auto")) {
             // Do nothing
-        } else if (this.ackMode.equals("client")) {
+        } else if (Ack.ackMode.equals("client")) {
             try {
                 client.ack(String.valueOf(messageId));
                 log.debug("Successfully acknowledged");

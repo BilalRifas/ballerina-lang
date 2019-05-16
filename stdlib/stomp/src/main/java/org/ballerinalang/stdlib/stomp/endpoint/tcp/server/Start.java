@@ -20,10 +20,10 @@ package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
+import org.ballerinalang.connector.api.Service;
 import org.ballerinalang.model.NativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BMap;
-import org.ballerinalang.connector.api.Service;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
@@ -35,10 +35,10 @@ import org.ballerinalang.stdlib.stomp.StompUtils;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
 import static org.ballerinalang.stdlib.stomp.StompConstants.COUNTDOWN_LATCH;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
  * Start server stomp listener.

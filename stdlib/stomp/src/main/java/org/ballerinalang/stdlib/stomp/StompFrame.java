@@ -18,6 +18,7 @@
 
 package org.ballerinalang.stdlib.stomp;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,17 +59,21 @@ public class StompFrame {
      * @return array of bytes.
      */
     public byte[] getBytes() {
-        String frame = this.command.toString() + '\n';
-        for (String key : this.header.keySet()) {
-            frame += key + ":" + this.header.get(key) + '\n';
+        StringBuilder frame = new StringBuilder(this.command.toString() + '\n');
+        for (Map.Entry<String, String> entry : this.header.entrySet()) {
+            String key = entry.getKey();
+            frame.append(key).append(":").append(this.header.get(key)).append('\n');
         }
-        frame += '\n';
+
+
+
+        frame.append('\n');
 
         if (this.body != null) {
-            frame += this.body;
+            frame.append(this.body);
         }
-        frame += "\0";
-        return frame.getBytes();
+        frame.append("\0");
+        return frame.toString().getBytes(Charset.forName("UTF-8"));
     }
 
     /**

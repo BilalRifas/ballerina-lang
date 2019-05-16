@@ -35,12 +35,12 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_HOST;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PORT;
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_LOGIN;
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PASSCODE;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_PORT;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
  * Initialize the server stomp endpoint.
@@ -67,8 +67,8 @@ public class InitListener extends BlockingNativeCallableUnit {
             BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
 
             this.validateURI(context);
-            String connectionURI = "tcp://" + this.userLogin + ":" + this.userPasscode +
-                    "@" + this.hostName + ":" + this.stompPort;
+            String connectionURI = "tcp://" + InitListener.userLogin + ":" + InitListener.userPasscode +
+                    "@" + InitListener.hostName + ":" + InitListener.stompPort;
 
             DefaultStompClient client = new DefaultStompClient(new URI(connectionURI));
             connection.addNativeData(CONFIG_FIELD_CLIENT_OBJ, client);
@@ -79,34 +79,34 @@ public class InitListener extends BlockingNativeCallableUnit {
         }
     }
 
-    public void validateURI(Context context) {
+    private void validateURI(Context context) {
         BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
 
             // TODO try to get rid the port by introducing only host with ex: tcp//localhost:61613
             BString login = (BString) endpointConfig.get(CONFIG_FIELD_LOGIN);
             if (login != null) {
-                this.userLogin = String.valueOf(login);
+                InitListener.userLogin = String.valueOf(login);
             } else {
                 log.error("Login field is null");
             }
 
             BString passcode = (BString) endpointConfig.get(CONFIG_FIELD_PASSCODE);
             if (passcode != null) {
-                this.userPasscode = String.valueOf(passcode);
+                InitListener.userPasscode = String.valueOf(passcode);
             } else {
                 log.error("Passcode field is null");
             }
 
             BString host = (BString) endpointConfig.get(CONFIG_FIELD_HOST);
             if (host != null) {
-                this.hostName = String.valueOf(host);
+                InitListener.hostName = String.valueOf(host);
             } else {
                 log.error("Host field is null");
             }
 
             BInteger port = (BInteger) endpointConfig.get(CONFIG_FIELD_PORT);
             if (port != null) {
-                this.stompPort = Integer.parseInt(String.valueOf(port));
+                InitListener.stompPort = Integer.parseInt(String.valueOf(port));
             } else {
                 log.error("Port field is null");
             }

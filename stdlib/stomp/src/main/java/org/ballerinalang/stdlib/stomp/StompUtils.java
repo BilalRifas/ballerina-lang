@@ -44,8 +44,10 @@ public class StompUtils {
      * GetError
      * @param context Represent ballerina context
      * @param errMsg  Error message
+     *
+     * return BLangVMErrors
      */
-    public static BError getError(Context context, String errMsg) {
+    static BError getError(Context context, String errMsg) {
         BMap<String, BValue> stompErrorRecord = createStompErrorRecord(context);
         stompErrorRecord.put(StompConstants.STOMP_ERROR_MESSAGE, new BString(errMsg));
         return BLangVMErrors.createError(context, true, BTypes.typeError, StompConstants.STOMP_ERROR_CODE,
@@ -65,7 +67,7 @@ public class StompUtils {
         }
     }
 
-    public static BError createStompError(ProgramFile programFile, String errMsg) {
+    static BError createStompError(ProgramFile programFile, String errMsg) {
         BMap<String, BValue> errorRecord = BLangConnectorSPIUtil
                 .createBStruct(programFile, STOMP_PACKAGE, STOMP_ERROR);
         errorRecord.put("message", new BString(errMsg));

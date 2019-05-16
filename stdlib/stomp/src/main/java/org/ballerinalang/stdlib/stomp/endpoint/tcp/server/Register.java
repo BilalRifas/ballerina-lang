@@ -18,24 +18,28 @@
 
 package org.ballerinalang.stdlib.stomp.endpoint.tcp.server;
 
-import java.util.List;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
-import org.ballerinalang.connector.api.*;
+import org.ballerinalang.connector.api.Annotation;
+import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
+import org.ballerinalang.connector.api.Service;
+import org.ballerinalang.connector.api.Struct;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.stdlib.stomp.DefaultStompClient;
-import org.ballerinalang.util.exceptions.BallerinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_DESTINATION;
+import java.util.List;
+import java.util.Locale;
+
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_ACKMODE;
 import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_DESTINATION;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
  * Register stomp listener service.
@@ -51,7 +55,6 @@ import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_
 public class Register extends BlockingNativeCallableUnit {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
-
     @Override
     public void execute(Context context) {
         BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
@@ -62,15 +65,8 @@ public class Register extends BlockingNativeCallableUnit {
         Struct annotationValue = serviceAnnotation.getValue();
         String destination = annotationValue.getStringField(CONFIG_FIELD_DESTINATION);
         String ackMode = annotationValue.getStringField(CONFIG_FIELD_ACKMODE);
-        String strLowerAck = ackMode.toLowerCase();
-
-        if (destination != null) {
-            connection.addNativeData(CONFIG_FIELD_DESTINATION, destination);
-        } else {
-            log.error("Destination is null");
-        }
-
-        if (strLowerAck != null) {
+        if (ackMode != null) {
+            String strLowerAck = ackMode.toLowerCase(Locale.ENGLISH);
             if (strLowerAck.equals("auto") || strLowerAck.equals("client") || strLowerAck.equals("client-individual")) {
                 connection.addNativeData(CONFIG_FIELD_ACKMODE, strLowerAck);
             } else {
@@ -78,6 +74,12 @@ public class Register extends BlockingNativeCallableUnit {
             }
         } else {
             log.error("Ack Mode is null");
+        }
+
+        if (destination != null) {
+            connection.addNativeData(CONFIG_FIELD_DESTINATION, destination);
+        } else {
+            log.error("Destination is null");
         }
 
         // Get stompClient object created in intListener

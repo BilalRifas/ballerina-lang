@@ -18,12 +18,14 @@
 
 package org.ballerinalang.stdlib.stomp;
 
+import org.ballerinalang.util.exceptions.BallerinaException;
+
 /**
  * Stomp exception.
  *
  * @since 0.995.0
  */
-public class StompException extends Exception {
+public class StompException extends BallerinaException {
 
     private static final long serialVersionUID = 5475019401678519895L;
     private String message;

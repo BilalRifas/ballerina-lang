@@ -20,7 +20,12 @@ package org.ballerinalang.stdlib.stomp;
 
 import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
-import org.ballerinalang.connector.api.*;
+import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
+import org.ballerinalang.connector.api.BallerinaConnectorException;
+import org.ballerinalang.connector.api.Executor;
+import org.ballerinalang.connector.api.ParamDetail;
+import org.ballerinalang.connector.api.Resource;
+import org.ballerinalang.connector.api.Service;
 import org.ballerinalang.model.values.BError;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
@@ -35,14 +40,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
 import static org.ballerinalang.stdlib.stomp.StompConstants.MESSAGE_OBJ;
-import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MSG;
 import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_CONTENT_NAME;
 import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_DESTINATION;
 import static org.ballerinalang.stdlib.stomp.StompConstants.MSG_ID;
-import static org.ballerinalang.stdlib.stomp.StompConstants.CONFIG_FIELD_CLIENT_OBJ;
 import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MESSAGE;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_MSG;
+import static org.ballerinalang.stdlib.stomp.StompConstants.STOMP_PACKAGE;
 
 /**
  * Extended DefaultStompClient of StompClient.
@@ -79,6 +84,7 @@ public class DefaultStompClient extends StompClient {
         this.callableUnit = callableUnit;
     }
 
+    // When broker is disconnected onDisconnected will be triggered.
     @Override
     public void onDisconnected() {
     }
@@ -94,7 +100,7 @@ public class DefaultStompClient extends StompClient {
         List<ParamDetail> paramDetails = this.onMessageResource.getParamDetails();
         String callerType = paramDetails.get(0).getVarType().toString();
         if (callerType.equals("string")) {
-            Executor.submit(this.onMessageResource, new ResponseCallback(body, messageId),
+            Executor.submit(this.onMessageResource, new ResponseCallback(),
                     new HashMap<>(), null, new BString(body));
         } else if (callerType.equals("ballerina/stomp:Message")) {
             msgObj.addNativeData(STOMP_MSG, body);
@@ -102,24 +108,16 @@ public class DefaultStompClient extends StompClient {
             msgObj.put(MSG_DESTINATION, new BString(destination));
             msgObj.put(MSG_ID, new BString(messageId));
             msgObj.addNativeData(CONFIG_FIELD_CLIENT_OBJ, this);
-            Executor.submit(this.onMessageResource, new ResponseCallback(body, messageId),
+            Executor.submit(this.onMessageResource, new ResponseCallback(),
                     new HashMap<>(), null, msgObj);
         }
     }
 
-
-    private class ResponseCallback implements CallableUnitCallback {
-        private String message;
-        private String messageId;
-
-        ResponseCallback(String message, String messageId) {
-            this.message = message;
-            this.messageId = messageId;
-        }
+    private static class ResponseCallback implements CallableUnitCallback {
 
         @Override
         public void notifySuccess() {
-            log.debug("Success notification");
+            log.debug("Successful completion");
         }
 
         @Override
@@ -138,12 +136,11 @@ public class DefaultStompClient extends StompClient {
         Service service = this.serviceRegistry.get(destination);
         extractResource(service);
         try {
-            Executor.submit( this.onErrorResource, new ResponseCallback(message, description),
+            Executor.submit(this.onErrorResource, new ResponseCallback(),
                     null, null, getErrorSignatureParameters(this.onErrorResource, description));
         } catch (BallerinaConnectorException c) {
             log.error("Error while executing onError resource", c);
         }
-
     }
 
     @Override
@@ -160,7 +157,6 @@ public class DefaultStompClient extends StompClient {
     }
 
     public void extractResource(Service service) {
-
         int count;
         for (count = 0; count < service.getResources().length; count++) {
             // Accessing each element of array

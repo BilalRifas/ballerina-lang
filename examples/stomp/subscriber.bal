@@ -1,7 +1,6 @@
 // This is the service implementation for STOMP protocol.
 import ballerina/stomp;
 import ballerina/log;
-import ballerina/io;
 
 // This initializes a stomp listener using the created tcp connection.
 listener stomp:Listener consumerEndpoint = new({
@@ -25,10 +24,8 @@ service stompListener1 on consumerEndpoint  {
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
-        //log:printInfo(payload);
-        log:printInfo("stompListener 1");
+        log:printInfo("StompListener 1");
         log:printInfo(content);
-
         var messageAck = message.ack();
     }
 
@@ -48,8 +45,7 @@ service stompListener2 on consumerEndpoint  {
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
-        //log:printInfo(payload);
-        log:printInfo("stompListener 2");
+        log:printInfo("StompListener 2");
         log:printInfo(content);
         var messageAck = message.ack();
     }

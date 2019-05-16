@@ -23,8 +23,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.UUID;
+
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -42,28 +41,14 @@ public abstract class StompClient {
     private Thread readerThread;
     private volatile boolean running = true;
 
-    /**
-     * constructor.
-     *
-     * @throws URISyntaxException
-     */
     public StompClient() throws URISyntaxException {
         this("tcp://localhost:61613");
     }
 
-    /**
-     * constructor.
-     *
-     * @param url
-     * @throws URISyntaxException
-     */
     public StompClient(String url) throws URISyntaxException {
         this(new URI(url));
     }
 
-    /**
-     * constructor.
-     */
     public StompClient(URI uri) {
         this.uri = uri;
     }
@@ -81,12 +66,7 @@ public abstract class StompClient {
 
     public abstract void onCriticalError(Exception e);
 
-    /**
-     * connect() - initialize work with STOMP server.
-     *
-     * @throws StompException
-     */
-    public void connect() throws StompException {
+    public void connect() {
         try {
             // connecting to STOMP server
             if (uri.getScheme().equals("tcp")) {
@@ -121,40 +101,20 @@ public abstract class StompClient {
 
             // wait CONNECTED server command.
             synchronized (this) {
-                wait(5000);
+                this.wait(5000);
             }
 
+        } catch (StompException ex) {
+            ex.initCause(ex);
         } catch (Exception e) {
-            StompException ex = new StompException("some problem with connection");
-            ex.initCause(e);
-            throw ex;
+            try {
+                throw e;
+            } catch (IOException | InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
-    /**
-     * disconnect() - finalize work with STOMP server.
-     */
-//    public void disconnect() {
-//        if (socket.isConnected()) {
-//            try {
-//                // sending DISCONNECT command.
-//                StompFrame frame = new StompFrame(StompCommand.DISCONNECTED);
-//                frame.header.put("session", sessionId);
-//                send(frame);
-//
-//                // stopping reader thread.
-//                running = false;
-//
-//                // close socket.
-//                socket.close();
-//            } catch (Exception e) {
-//            }
-//        }
-//    }
-
-    /**
-     * reader() - thread for read and parse data from STOMP server.
-     */
     private void reader() {
         try {
             InputStream in = this.socket.getInputStream();
@@ -186,7 +146,7 @@ public abstract class StompClient {
                         case CONNECTED:
                             // unblock connect().
                             synchronized (this) {
-                                notify();
+                                this.notifyAll();
                             }
                             sessionId = frame.header.get("session");
                             onConnected(sessionId);
@@ -222,94 +182,7 @@ public abstract class StompClient {
         }
     }
 
-    /**
-     * BEGIN is used to start a transaction.
-     *
-     * @param transaction
-     * @throws StompException
-     */
-    public void begin(String transaction) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.BEGIN);
-        frame.header.put("transaction", transaction);
-        send(frame);
-    }
-
-    /**
-     * COMMIT is used to commit a transaction in progress.
-     *
-     * @param transaction
-     * @throws StompException
-     */
-    public void commit(String transaction) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.COMMIT);
-        frame.header.put("transaction", transaction);
-        send(frame);
-    }
-
-    /**
-     * ABORT is used to roll back a transaction in progress.
-     *
-     * @param transaction
-     * @throws StompException
-     */
-    public void abort(String transaction, String messageId) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.ABORT);
-        frame.header.put("transaction", transaction);
-        send(frame);
-    }
-
-    /**
-     * The SEND command sends a message to a destination in the messaging system.
-     *
-     * @param destination
-     * @param message
-     * @throws StompException
-     */
-    public void send(String destination, String message) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.SEND);
-        frame.header.put("destination", destination);
-        frame.header.put("session", sessionId);
-        frame.body = message;
-        send(frame);
-    }
-
-    /**
-     * The SEND command sends a message to a destination in the messaging system.
-     *
-     * @param destination
-     * @param header
-     * @param message
-     * @throws StompException
-     */
-    public void send(String destination, Map<String, String> header, String message) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.SEND);
-        frame.header.put("destination", destination);
-        frame.header.put("session", sessionId);
-        for (String key : header.keySet()) {
-            frame.header.put(key, header.get(key));
-        }
-        frame.body = message;
-        send(frame);
-    }
-
-    /**
-     * The SUBSCRIBE command is used to register to listen to a given destination.
-     *
-     * @param destination
-     * @throws StompException
-     */
-    public void subscribe(String destination) throws StompException {
-        subscribe(destination, "auto");
-    }
-
-    /**
-     * The SUBSCRIBE command is used to register to listen to a given destination.
-     *
-     * @param destination
-     * @param ack
-     * @throws StompException
-     */
-    public void subscribe(String destination, String ack) throws StompException {
+    public void subscribe(String destination, String ack) {
         StompFrame frame = new StompFrame(StompCommand.SUBSCRIBE);
         frame.header.put("destination", destination);
         frame.header.put("session", sessionId);
@@ -317,66 +190,20 @@ public abstract class StompClient {
         send(frame);
     }
 
-    public void durableSubscribe(String destination, String ack) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.SUBSCRIBE);
-        frame.header.put("destination", destination);
-        frame.header.put("session", sessionId);
-        frame.header.put("ack", ack);
-        String uuid = UUID.randomUUID().toString().replace("-", "");
-        frame.header.put("id", uuid);
-        frame.header.put("durable", "true");
-        frame.header.put("auto-delete:", "false");
-        send(frame);
-    }
-
-    /**
-     * The UNSUBSCRIBE command is used to remove an existing subscription.
-     *
-     * @param destination
-     * @throws StompException
-     */
-    public void unsubscribe(String destination) throws StompException {
-        StompFrame frame = new StompFrame(StompCommand.UNSUBSCRIBE);
-        frame.header.put("destination", destination);
-        frame.header.put("session", sessionId);
-        send(frame);
-    }
-
-    /**
-     * ACK is used to acknowledge consumption of a message from a subscription using
-     * client acknowledgment.
-     *
-     * @param messageId
-     * @throws StompException
-     */
-    public void ack(String messageId) throws StompException {
+    public void ack(String messageId) {
         StompFrame frame = new StompFrame(StompCommand.ACK);
         frame.header.put("message-id", messageId);
         send(frame);
     }
 
-    /**
-     * ACK is used to acknowledge consumption of a message from a subscription using
-     * client acknowledgment.
-     *
-     * @param messageId
-     * @param transaction
-     * @throws StompException
-     */
-    public void ack(String messageId, String transaction) throws StompException {
+    public void ack(String messageId, String transaction) {
         StompFrame frame = new StompFrame(StompCommand.ACK);
         frame.header.put("message-id", messageId);
         frame.header.put("transaction", transaction);
         send(frame);
     }
 
-    /**
-     * send - help function for sending any frame to STOMP server.
-     *
-     * @param frame
-     * @throws StompException
-     */
-    private synchronized void send(StompFrame frame) throws StompException {
+    private synchronized void send(StompFrame frame) {
         try {
             socket.getOutputStream().write(frame.getBytes());
         } catch (IOException e) {
