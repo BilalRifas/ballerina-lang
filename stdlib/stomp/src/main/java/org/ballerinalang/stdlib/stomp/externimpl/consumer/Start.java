@@ -32,6 +32,7 @@ import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.ballerinalang.stdlib.stomp.message.Acknowledge;
 import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
 import org.ballerinalang.stdlib.stomp.message.StompException;
+import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -78,8 +79,14 @@ public class Start implements NativeCallableUnit {
                 String subscribeDestination = entry.getKey();
 
                 // Keeps on waiting for the connected flag, once connected is made it should subscribe on queue.
-                if (client.isConnected()) {
-                    client.subscribe(subscribeDestination, ackMode);
+                int maxAttempts = 5;
+                for (int count = 0; count < maxAttempts;) {
+                    if (client.isConnected()) {
+                            client.subscribe(subscribeDestination, ackMode);
+                            count = 5;
+                    } else {
+                        count++;
+                    }
                 }
             }
 
