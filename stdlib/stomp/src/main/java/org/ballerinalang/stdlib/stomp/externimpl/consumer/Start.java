@@ -74,19 +74,14 @@ public class Start implements NativeCallableUnit {
             client.connect();
 
             // Change variable name to destination Map or something
-            Map<String, Service> subMapDestination = client.getServiceRegistryMap();
-            for (Map.Entry<String, Service> entry : subMapDestination.entrySet()) {
+            Map<String, Service> destinationMap = client.getServiceRegistryMap();
+            for (Map.Entry<String, Service> entry : destinationMap.entrySet()) {
                 String subscribeDestination = entry.getKey();
 
-                // Keeps on waiting for the connected flag, once connected is made it should subscribe on queue.
-                int maxAttempts = 5;
-                for (int count = 0; count < maxAttempts;) {
-                    if (client.isConnected()) {
-                            client.subscribe(subscribeDestination, ackMode);
-                            count = 5;
-                    } else {
-                        count++;
-                    }
+                CountDownLatch connectLatch = new CountDownLatch(1);
+                if (client.isConnected()) {
+                    connectLatch.countDown();
+                    client.subscribe(subscribeDestination, ackMode);
                 }
             }
 
