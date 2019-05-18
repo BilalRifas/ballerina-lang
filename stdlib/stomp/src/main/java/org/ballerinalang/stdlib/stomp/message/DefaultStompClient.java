@@ -66,11 +66,11 @@ public class DefaultStompClient extends StompClient {
     @Override
     public void onConnected(String sessionId) {
         // This is for testing: make the client connection delay.
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(15000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         if (callableUnit != null) {
             callableUnit.notifySuccess();

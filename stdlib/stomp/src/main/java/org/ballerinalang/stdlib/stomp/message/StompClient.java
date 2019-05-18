@@ -225,7 +225,7 @@ public abstract class StompClient {
         String uuid = UUID.randomUUID().toString().replace("-", "");
         frame.header.put("id", uuid);
         frame.header.put("durable", "true");
-        frame.header.put("auto-delete:", "false");
+//        frame.header.put("auto-delete", "false");
         send(frame);
     }
 
