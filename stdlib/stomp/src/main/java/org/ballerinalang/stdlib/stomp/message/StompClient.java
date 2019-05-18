@@ -24,6 +24,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -97,6 +98,7 @@ public abstract class StompClient {
                     connectFrame.header.put("passcode", credentials[1]);
                 }
             }
+
             send(connectFrame);
 
             // wait CONNECTED server command.

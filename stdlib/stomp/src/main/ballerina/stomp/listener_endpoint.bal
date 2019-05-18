@@ -53,7 +53,6 @@ public type StompServiceConfig record {
     string destination = "";
     string ackMode = "AUTO";
     boolean durable = false;
-    boolean autoDelete = false;
 };
 
 public annotation<service> ServiceConfig StompServiceConfig;

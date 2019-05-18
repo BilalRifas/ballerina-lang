@@ -78,6 +78,11 @@ public class Register extends BlockingNativeCallableUnit {
             log.error("Destination is null");
         }
 
+        boolean durableFlag = annotationValue.getBooleanField(StompConstants.CONFIG_FIELD_DURABLE);
+        if (durableFlag){
+            connection.addNativeData(StompConstants.CONFIG_FIELD_DURABLE, true);
+        }
+
         // Get stompClient object created in intListener
         DefaultStompClient client = (DefaultStompClient)
                 connection.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);

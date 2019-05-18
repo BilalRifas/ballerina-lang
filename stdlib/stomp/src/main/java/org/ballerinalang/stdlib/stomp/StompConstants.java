@@ -35,12 +35,14 @@ public class StompConstants {
     public static final String CONFIG_FIELD_LOGIN = "login";
     public static final String CONFIG_FIELD_PASSCODE = "passcode";
     public static final String CONFIG_FIELD_ACKMODE = "ackMode";
+    public static final String CONFIG_FIELD_DURABLE = "durable";
     public static final String CONFIG_FIELD_DESTINATION = "destination";
 
     public static final String CLIENT_CONFIG = "config";
     public static final String CONFIG_FIELD_CLIENT_OBJ = "client";
 
     public static final String COUNTDOWN_LATCH = "countdown-latch";
+    public static final String CONNECTCOUNTDOWN_LATCH = "connect-countdown-latch";
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";

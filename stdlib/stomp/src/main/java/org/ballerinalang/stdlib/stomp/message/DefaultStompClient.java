@@ -18,6 +18,7 @@
 
 package org.ballerinalang.stdlib.stomp.message;
 
+import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
@@ -41,6 +42,8 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+
 /**
  * Extended DefaultStompClient of StompClient.
  *
@@ -54,6 +57,7 @@ public class DefaultStompClient extends StompClient {
     private Resource onMessageResource;
     private Resource onErrorResource;
     private String destination;
+    private CountDownLatch connectDownLatch;
 
     public DefaultStompClient(URI uri) {
         super(uri);
@@ -61,15 +65,23 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onConnected(String sessionId) {
-        this.connected = true;
+        // This is for testing: make the client connection delay.
+        try {
+            Thread.sleep(15000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         if (callableUnit != null) {
             callableUnit.notifySuccess();
         }
+
+        log.debug("Client connected");
+        connectDownLatch.countDown();
     }
 
-    public boolean isConnected() {
-        return this.connected;
+    public void getCountDownLatch(CountDownLatch countDownLatch){
+        this.connectDownLatch = countDownLatch;
     }
 
     public void setCallableUnit(CallableUnitCallback callableUnit) {
