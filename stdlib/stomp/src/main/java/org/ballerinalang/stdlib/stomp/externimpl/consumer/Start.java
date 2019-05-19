@@ -66,7 +66,6 @@ public class Start implements NativeCallableUnit {
             start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
 
             String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
-            //boolean durableFlag = (boolean) start.getNativeData(StompConstants.CONFIG_FIELD_DURABLE);
 
             Acknowledge ack = new Acknowledge();
             ack.setAckMode(ackMode);

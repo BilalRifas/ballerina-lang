@@ -158,10 +158,6 @@ public abstract class StompClient {
                     switch (frame.command) {
                         case CONNECTED:
                             countDownLatch.countDown();
-                            // unblock connect().
-//                            synchronized (this) {
-//                                this.notifyAll();
-//                            }
                             sessionId = frame.header.get("session");
                             onConnected(sessionId);
 

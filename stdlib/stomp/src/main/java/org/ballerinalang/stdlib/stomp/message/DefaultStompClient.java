@@ -52,7 +52,6 @@ public class DefaultStompClient extends StompClient {
     private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
     private CallableUnitCallback callableUnit;
     private Map<String, Service> serviceRegistry = new HashMap<>();
-    private boolean connected;
     private Resource onMessageResource;
     private Resource onErrorResource;
     private String destination;
@@ -65,7 +64,6 @@ public class DefaultStompClient extends StompClient {
     @Override
     public void onConnected(String sessionId) {
         // This is for testing: make the client connection delay. Thread.sleep(15000);
-
         if (callableUnit != null) {
             callableUnit.notifySuccess();
         }
@@ -113,7 +111,6 @@ public class DefaultStompClient extends StompClient {
     }
 
     private static class ResponseCallback implements CallableUnitCallback {
-
         @Override
         public void notifySuccess() {
             log.debug("Successful completion");
