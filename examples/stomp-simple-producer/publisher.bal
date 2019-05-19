@@ -16,4 +16,5 @@ public function main() {
         string message = "Hello World From Ballerina";
         string destination = "/queue/sports";
         var publish = stompSender->send(message,destination);
+        var disconnect = stompSender->disconnect();
 }
