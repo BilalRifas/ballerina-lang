@@ -18,7 +18,6 @@
 
 package org.ballerinalang.stdlib.stomp.message;
 
-import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
@@ -65,12 +64,7 @@ public class DefaultStompClient extends StompClient {
 
     @Override
     public void onConnected(String sessionId) {
-        // This is for testing: make the client connection delay.
-//        try {
-//            Thread.sleep(15000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        // This is for testing: make the client connection delay. Thread.sleep(15000);
 
         if (callableUnit != null) {
             callableUnit.notifySuccess();
@@ -80,7 +74,7 @@ public class DefaultStompClient extends StompClient {
         connectDownLatch.countDown();
     }
 
-    public void getCountDownLatch(CountDownLatch countDownLatch){
+    public void getCountDownLatch(CountDownLatch countDownLatch) {
         this.connectDownLatch = countDownLatch;
     }
 

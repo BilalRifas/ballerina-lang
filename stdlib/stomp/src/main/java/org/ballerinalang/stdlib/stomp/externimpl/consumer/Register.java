@@ -79,7 +79,7 @@ public class Register extends BlockingNativeCallableUnit {
         }
 
         boolean durableFlag = annotationValue.getBooleanField(StompConstants.CONFIG_FIELD_DURABLE);
-        if (durableFlag){
+        if (durableFlag) {
             connection.addNativeData(StompConstants.CONFIG_FIELD_DURABLE, true);
         }
 

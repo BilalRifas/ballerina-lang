@@ -18,13 +18,19 @@
 
 package org.ballerinalang.stdlib.stomp.message;
 
+import org.ballerinalang.stdlib.stomp.externimpl.consumer.Start;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -34,6 +40,8 @@ import javax.net.ssl.SSLSocketFactory;
  * @since 0.995.0
  */
 public abstract class StompClient {
+    private static final Logger log = LoggerFactory.getLogger(Start.class);
+    private CountDownLatch countDownLatch = new CountDownLatch(1);
     private final URI uri;
 
     private Socket socket;
@@ -103,7 +111,10 @@ public abstract class StompClient {
 
             // wait CONNECTED server command.
             synchronized (this) {
-                this.wait(5000);
+                if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
+                    log.debug("Synchronized Wait time exceeded");
+                    throw new RuntimeException(new TimeoutException());
+                }
             }
 
         } catch (StompException ex) {
@@ -146,12 +157,14 @@ public abstract class StompClient {
                     // run handlers.
                     switch (frame.command) {
                         case CONNECTED:
+                            countDownLatch.countDown();
                             // unblock connect().
-                            synchronized (this) {
-                                this.notifyAll();
-                            }
+//                            synchronized (this) {
+//                                this.notifyAll();
+//                            }
                             sessionId = frame.header.get("session");
                             onConnected(sessionId);
+
                             break;
                         case DISCONNECTED:
                             onDisconnected();
