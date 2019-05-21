@@ -76,16 +76,10 @@ public class Start implements NativeCallableUnit {
 
             client.setCallableUnit(callableUnitCallback);
 
-            // Change variable name to destination Map or something
-            Map<String, Service> destinationMap = client.getServiceRegistryMap();
-            for (Map.Entry<String, Service> entry : destinationMap.entrySet()) {
-                this.subscribeDestination = entry.getKey();
-            }
-
             CountDownLatch signal = new CountDownLatch(1);
 
             // Connect to STOMP server, send CONNECT command and wait CONNECTED answer
-            client.getCountDownLatch(signal);
+            client.setCountDownLatch(signal);
 
             client.connect();
 
@@ -99,7 +93,13 @@ public class Start implements NativeCallableUnit {
                 Thread.currentThread().interrupt();
             }
 
-            client.subscribe(this.subscribeDestination, ackMode);
+            // Change variable name to destination Map or something
+            Map<String, Service> destinationMap = client.getServiceRegistryMap();
+            for (Map.Entry<String, Service> entry : destinationMap.entrySet()) {
+                subscribeDestination = entry.getKey();
+                client.subscribe(this.subscribeDestination, ackMode);
+            }
+
             // It is essential to keep a non-daemon thread running in order to avoid the java program or the
             // Ballerina service from exiting
             new Thread(() -> {

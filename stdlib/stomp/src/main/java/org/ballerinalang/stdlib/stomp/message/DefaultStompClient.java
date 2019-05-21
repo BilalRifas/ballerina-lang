@@ -72,7 +72,7 @@ public class DefaultStompClient extends StompClient {
         connectDownLatch.countDown();
     }
 
-    public void getCountDownLatch(CountDownLatch countDownLatch) {
+    public void setCountDownLatch(CountDownLatch countDownLatch) {
         this.connectDownLatch = countDownLatch;
     }
 

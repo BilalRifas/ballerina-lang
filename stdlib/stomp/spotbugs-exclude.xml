@@ -16,4 +16,16 @@
   ~ under the License.
   -->
 <FindBugsFilter>
+    <Match>
+        <Bug pattern="NN_NAKED_NOTIFY" />
+    </Match>
+    <Match>
+    <Bug pattern="NO_NOTIFY_NOT_NOTIFYALL" />
+    </Match>
+    <Match>
+    <Bug pattern="WA_NOT_IN_LOOP" />
+    </Match>
+    <Match>
+    <Bug pattern="UW_UNCOND_WAIT" />
+    </Match>
 </FindBugsFilter>

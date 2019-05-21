@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package org.ballerinalang.stdlib.stomp.message;
 
 import org.ballerinalang.stdlib.stomp.externimpl.consumer.Start;
@@ -28,9 +10,6 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -41,7 +20,6 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public abstract class StompClient {
     private static final Logger log = LoggerFactory.getLogger(Start.class);
-    private CountDownLatch countDownLatch = new CountDownLatch(1);
     private final URI uri;
 
     private Socket socket;
@@ -111,10 +89,7 @@ public abstract class StompClient {
 
             // wait CONNECTED server command.
             synchronized (this) {
-                if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
-                    log.debug("Synchronized Wait time exceeded");
-                    throw new RuntimeException(new TimeoutException());
-                }
+                wait();
             }
 
         } catch (StompException ex) {
@@ -157,10 +132,11 @@ public abstract class StompClient {
                     // run handlers.
                     switch (frame.command) {
                         case CONNECTED:
-                            countDownLatch.countDown();
+                            synchronized (this) {
+                                notify();
+                            }
                             sessionId = frame.header.get("session");
                             onConnected(sessionId);
-
                             break;
                         case DISCONNECTED:
                             onDisconnected();
