@@ -40,17 +40,17 @@ public class StompConstants {
 
     public static final String CONFIG_FIELD_CLIENT_OBJ = "client";
 
-    public static final String COUNTDOWN_LATCH = "countdown-latch";
-
-    // Warning suppression
-    public static final String UNCHECKED = "unchecked";
-
     public static final String STOMP_MESSAGE = "stomp-message";
     public static final String MSG_CONTENT_NAME = "content";
     public static final String MSG_DESTINATION = "destination";
     public static final String STOMP_MSG = "STOMPMSG";
     public static final String MSG_ID = "message-id";
     public static final String MESSAGE_OBJ = "Message";
+    public static final String ACK_MODE = "ack-mode";
+    public static final String ACK_AUTO = "auto";
+    public static final String ACK_CLIENT = "client";
+    public static final String ACK_CLIENT_INDIVIDUAL = "client-individual";
+    public static final String COUNTDOWN_LATCH = "countdown-latch";
 
     // Error related constants
     static final String STOMP_ERROR_CODE = "{ballerina/stomp}StompError";

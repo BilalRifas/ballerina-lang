@@ -29,9 +29,10 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.stdlib.stomp.StompConstants;
 import org.ballerinalang.stdlib.stomp.StompUtils;
-import org.ballerinalang.stdlib.stomp.message.Acknowledge;
 import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
+import org.ballerinalang.stdlib.stomp.message.StompDispatcher;
 import org.ballerinalang.stdlib.stomp.message.StompException;
+import org.ballerinalang.util.exceptions.BallerinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,18 +58,13 @@ import java.util.concurrent.TimeoutException;
 public class Start implements NativeCallableUnit {
     private static final Logger log = LoggerFactory.getLogger(Start.class);
     private CountDownLatch countDownLatch = new CountDownLatch(1);
-    private String subscribeDestination;
 
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
         try {
             BMap<String, BValue> start = (BMap<String, BValue>) context.getRefArgument(0);
             start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
-
             String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
-
-            Acknowledge ack = new Acknowledge();
-            ack.setAckMode(ackMode);
 
             // get stompClient object created in intListener
             DefaultStompClient client = (DefaultStompClient)
@@ -84,9 +80,10 @@ public class Start implements NativeCallableUnit {
             client.connect();
 
             try {
-                if (!signal.await(30, TimeUnit.SECONDS)) {
+                // TODO: Implement Retry method after timeout
+                if (!signal.await(60, TimeUnit.SECONDS)) {
                     log.debug("Connection time exceeded");
-                    throw new RuntimeException(new TimeoutException());
+                    throw new BallerinaException(new TimeoutException());
                 }
                 log.debug("Waiting for connect");
             } catch (InterruptedException e) {
@@ -94,10 +91,10 @@ public class Start implements NativeCallableUnit {
             }
 
             // Change variable name to destination Map or something
-            Map<String, Service> destinationMap = client.getServiceRegistryMap();
+            Map<String, Service> destinationMap = StompDispatcher.getServiceRegistryMap();
             for (Map.Entry<String, Service> entry : destinationMap.entrySet()) {
-                subscribeDestination = entry.getKey();
-                client.subscribe(this.subscribeDestination, ackMode);
+                String subscribeDestination = entry.getKey();
+                client.subscribe(subscribeDestination, ackMode);
             }
 
             // It is essential to keep a non-daemon thread running in order to avoid the java program or the

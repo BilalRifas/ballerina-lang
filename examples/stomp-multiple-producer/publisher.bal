@@ -1,6 +1,5 @@
 // This is the publisher implementation for STOMP protocol.
 import ballerina/stomp;
-import ballerina/io;
 
 // This initializes a STOMP connection with the STOMP broker.
 stomp:Sender stompSender = new({

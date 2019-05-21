@@ -51,7 +51,7 @@ public type Listener object {
 
 public type StompServiceConfig record {
     string destination = "";
-    string ackMode = "AUTO";
+    AckType ackMode = CLIENT;
     boolean durable = false;
 };
 

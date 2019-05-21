@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
 /**
  * Initialize the server stomp endpoint.
  *
@@ -76,32 +77,16 @@ public class InitListener extends BlockingNativeCallableUnit {
     private void validateURI(Context context) {
         BMap<String, BValue> endpointConfig = (BMap<String, BValue>) context.getRefArgument(1);
 
-            BString login = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_LOGIN);
-            if (login != null) {
-                InitListener.userLogin = String.valueOf(login);
-            } else {
-                log.error("Login field is null");
-            }
+        BString login = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_LOGIN);
+        InitListener.userLogin = String.valueOf(login);
 
-            BString passcode = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_PASSCODE);
-            if (passcode != null) {
-                InitListener.userPasscode = String.valueOf(passcode);
-            } else {
-                log.error("Passcode field is null");
-            }
+        BString passcode = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_PASSCODE);
+        InitListener.userPasscode = String.valueOf(passcode);
 
-            BString host = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_HOST);
-            if (host != null) {
-                InitListener.hostName = String.valueOf(host);
-            } else {
-                log.error("Host field is null");
-            }
+        BString host = (BString) endpointConfig.get(StompConstants.CONFIG_FIELD_HOST);
+        InitListener.hostName = String.valueOf(host);
 
-            BInteger port = (BInteger) endpointConfig.get(StompConstants.CONFIG_FIELD_PORT);
-            if (port != null) {
-                InitListener.stompPort = Integer.parseInt(String.valueOf(port));
-            } else {
-                log.error("Port field is null");
-            }
+        BInteger port = (BInteger) endpointConfig.get(StompConstants.CONFIG_FIELD_PORT);
+        InitListener.stompPort = Integer.parseInt(String.valueOf(port));
     }
 }

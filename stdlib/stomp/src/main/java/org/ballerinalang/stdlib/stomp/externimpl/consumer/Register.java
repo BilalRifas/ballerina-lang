@@ -30,12 +30,12 @@ import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.stdlib.stomp.StompConstants;
-import org.ballerinalang.stdlib.stomp.message.DefaultStompClient;
+import org.ballerinalang.stdlib.stomp.message.StompDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Locale;
+
 /**
  * Register stomp listener service.
  *
@@ -49,8 +49,8 @@ import java.util.Locale;
                 structType = "Listener",
                 structPackage = StompConstants.STOMP_PACKAGE), isPublic = true)
 public class Register extends BlockingNativeCallableUnit {
-
     private static final Logger log = LoggerFactory.getLogger(Register.class);
+    private String ackMode;
     @Override
     public void execute(Context context) {
         BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
@@ -61,15 +61,13 @@ public class Register extends BlockingNativeCallableUnit {
         Struct annotationValue = serviceAnnotation.getValue();
         String destination = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DESTINATION);
         String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
-        if (ackMode != null) {
-            String strLowerAck = ackMode.toLowerCase(Locale.ENGLISH);
-            if (strLowerAck.equals("auto") || strLowerAck.equals("client") || strLowerAck.equals("client-individual")) {
-                connection.addNativeData(StompConstants.CONFIG_FIELD_ACKMODE, strLowerAck);
-            } else {
-                log.error("Ack Mode is not supported");
-            }
+
+        if (ackMode.equals(StompConstants.ACK_AUTO) || ackMode.equals(StompConstants.ACK_CLIENT) ||
+                ackMode.equals(StompConstants.ACK_CLIENT_INDIVIDUAL)) {
+            this.ackMode = ackMode;
+            connection.addNativeData(StompConstants.CONFIG_FIELD_ACKMODE, this.ackMode);
         } else {
-            log.error("Ack Mode is null");
+            log.error("Ack Mode is not supported");
         }
 
         if (destination != null) {
@@ -83,11 +81,9 @@ public class Register extends BlockingNativeCallableUnit {
             connection.addNativeData(StompConstants.CONFIG_FIELD_DURABLE, true);
         }
 
-        // Get stompClient object created in intListener
-        DefaultStompClient client = (DefaultStompClient)
-                connection.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
+        StompDispatcher.registerService(service, destination);
 
-        client.registerService(service, destination);
+
         context.setReturnValues();
     }
 

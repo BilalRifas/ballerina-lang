@@ -20,5 +20,4 @@ public class StompException extends BallerinaException {
     public String getMessage() {
         return message;
     }
-
 }

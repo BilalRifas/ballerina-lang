@@ -14,8 +14,8 @@ listener stomp:Listener consumerEndpoint = new({
 
 // Add service config
 @stomp:ServiceConfig{
-        destination:"/queue/sports",
-        ackMode:"AUTO"
+    destination:"/queue/sports",
+    ackMode: stomp:AUTO
 }
 
 // This binds the created consumer to the listener service.
@@ -23,6 +23,7 @@ service stompListenerSports on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
+
         var content = message.getContent();
         log:printInfo("StompListener Sports");
         log:printInfo(content);
@@ -36,7 +37,7 @@ service stompListenerSports on consumerEndpoint  {
 
 @stomp:ServiceConfig{
     destination:"/queue/news",
-    ackMode:"AUTO"
+    ackMode: stomp:AUTO
 }
 
 service stompListenerNews on consumerEndpoint  {

@@ -6,9 +6,9 @@ package org.ballerinalang.stdlib.stomp.message;
  * @since 0.995.0
  */
 enum StompCommand {
-// client-commands
+// Client-commands
 CONNECT, SEND, SUBSCRIBE, UNSUBSCRIBE, BEGIN, COMMIT, ABORT, ACK, DISCONNECT,
 
-// server-commands
+// Server-commands
 CONNECTED, MESSAGE, RECEIPT, ERROR, DISCONNECTED
 }

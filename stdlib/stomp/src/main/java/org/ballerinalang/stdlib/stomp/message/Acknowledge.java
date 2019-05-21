@@ -29,6 +29,7 @@ import org.ballerinalang.stdlib.stomp.StompConstants;
 import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Initialize the Acknowledge.
  *
@@ -44,24 +45,19 @@ import org.slf4j.LoggerFactory;
 )
 
 public class Acknowledge extends BlockingNativeCallableUnit {
-    private static String ackMode = "auto";
     private static final Logger log = LoggerFactory.getLogger(Acknowledge.class);
-
-    public static void setAckMode(String ackMode) {
-        Acknowledge.ackMode = ackMode;
-    }
 
     @Override
     public void execute(Context context) {
-        @SuppressWarnings(StompConstants.UNCHECKED)
         BMap<String, BValue> message = (BMap<String, BValue>) context.getRefArgument(0);
         DefaultStompClient client = (DefaultStompClient)
                 message.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
         BValue messageId = message.get(StompConstants.MSG_ID);
 
-        if (Acknowledge.ackMode.equals("auto")) {
-            // Do nothing
-        } else if (Acknowledge.ackMode.equals("client")) {
+        BMap<String, BValue> msgObj = (BMap<String, BValue>) message.getNativeData(StompConstants.MESSAGE_OBJ);
+        String ackMode = String.valueOf(msgObj.get(StompConstants.ACK_MODE));
+
+        if (ackMode.equals(StompConstants.ACK_CLIENT) || ackMode.equals(StompConstants.ACK_CLIENT_INDIVIDUAL)) {
             try {
                 client.ack(String.valueOf(messageId));
                 log.debug("Successfully acknowledged");
@@ -69,5 +65,6 @@ public class Acknowledge extends BlockingNativeCallableUnit {
                 context.setReturnValues(StompUtils.getError(context, e));
             }
         }
+
     }
 }

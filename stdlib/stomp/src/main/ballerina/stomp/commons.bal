@@ -19,7 +19,7 @@
 # `auto`: ACK type auto
 # `client`: ACK type client
 # `client-individual`: ACK type client-individual
-public type AckType "auto"|"client"|"client-individual";
+public type AckType AUTO|CLIENT|CLIENTINDIVIDUAL;
 
 # Constant for STOMP ack type auto
 public const AUTO = "auto";
