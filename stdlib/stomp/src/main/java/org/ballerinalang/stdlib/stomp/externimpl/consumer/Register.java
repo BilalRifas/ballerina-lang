@@ -55,12 +55,14 @@ public class Register extends BlockingNativeCallableUnit {
     public void execute(Context context) {
         BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
 
-        // Get service config annotation values
+        // Get service config annotation values.
         Service service = BLangConnectorSPIUtil.getServiceRegistered(context);
         Annotation serviceAnnotation = getServiceConfigAnnotation(service);
         Struct annotationValue = serviceAnnotation.getValue();
         String destination = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DESTINATION);
         String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
+        StompDispatcher dispatcher = new StompDispatcher();
+        dispatcher.execute(context);
 
         if (ackMode.equals(StompConstants.ACK_AUTO) || ackMode.equals(StompConstants.ACK_CLIENT) ||
                 ackMode.equals(StompConstants.ACK_CLIENT_INDIVIDUAL)) {
@@ -82,7 +84,6 @@ public class Register extends BlockingNativeCallableUnit {
         }
 
         StompDispatcher.registerService(service, destination);
-
 
         context.setReturnValues();
     }

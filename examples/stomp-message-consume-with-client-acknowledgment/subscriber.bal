@@ -1,6 +1,9 @@
 // This is the service implementation for STOMP protocol.
 import ballerina/stomp;
 import ballerina/log;
+import ballerina/io;
+
+int limitCount = 1;
 
 // This initializes a stomp listener using the created tcp connection.
 listener stomp:Listener consumerEndpoint = new({
@@ -18,6 +21,7 @@ listener stomp:Listener consumerEndpoint = new({
         ackMode: stomp:CLIENT
 }
 
+// TODO : Check with other language clients.
 // This binds the created consumer to the listener service.
 service stompListenerSports on consumerEndpoint  {
     // This resource is invoked when a message is received.
@@ -25,7 +29,13 @@ service stompListenerSports on consumerEndpoint  {
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
         log:printInfo(content);
-        var messageAck = message.ack();
+        if (limitCount < 5) {
+            limitCount= limitCount + 1;
+        } else {
+            log:printInfo("----------- Limit count exceeded. Acknowledged messages -----------");
+            limitCount = 0;
+            var messageAck = message.ack();
+        }
     }
 
     // // This resource is invoked when the connection is interrupted.

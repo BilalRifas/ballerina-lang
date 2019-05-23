@@ -128,7 +128,6 @@ public remote function Sender.send(string message, string destination) returns e
 
 public remote function Sender.disconnect() returns error?{
     socket:Client socketClient = self.socketClient;
-    //string messageId = system:uuid();
 
     // DISCONNECT frame to disconnect.
     string disconnect = "DISCONNECT" + "\n" + "\n" + self.endOfFrame;

@@ -30,7 +30,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * @since 0.995.0
  */
-public class DefaultStompClient extends StompClient {
+public class DefaultStompClient extends StompListener {
     private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
     private CallableUnitCallback callableUnit;
     private CountDownLatch connectDownLatch;
@@ -56,21 +56,9 @@ public class DefaultStompClient extends StompClient {
         this.callableUnit = callableUnit;
     }
 
-    // When broker is disconnected onDisconnected will be triggered.
-    @Override
-    public void onDisconnected() {
-        // It's not implemented in Ballerina yet
-    }
-
     @Override
     public void onMessage(String messageId, String body, String destination) {
         StompDispatcher.executeOnMessage(messageId, body, destination);
-    }
-
-    // When STOMP broker sends an acknowledgement receipt onReceipt will get triggered.
-    @Override
-    public void onReceipt(String receiptId) {
-        // It's not implemented in Ballerina yet
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.Map;
 public class StompFrame {
 
     public StompCommand command;
-    public Map<String, String> header = new HashMap<String, String>();
+    public Map<String, String> header = new HashMap<>();
     public String body;
 
     /**

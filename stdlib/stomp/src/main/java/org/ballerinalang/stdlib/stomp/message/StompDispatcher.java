@@ -2,7 +2,6 @@ package org.ballerinalang.stdlib.stomp.message;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BLangVMErrors;
-import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.connector.api.Annotation;
 import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
@@ -32,7 +31,7 @@ import java.util.Map;
  *
  * @since 0.995.0
  */
-public class StompDispatcher extends BlockingNativeCallableUnit {
+public class StompDispatcher {
     private static final Logger log = LoggerFactory.getLogger(StompDispatcher.class);
     private static Map<String, Service> serviceRegistry = new HashMap<>();
     private static Map<String, Resource> resourceRegistry = new HashMap<>();
@@ -45,7 +44,7 @@ public class StompDispatcher extends BlockingNativeCallableUnit {
         // Get stompClient object created in intListener
         DefaultStompClient stompClient = (DefaultStompClient)
                 connection.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
-        client = stompClient;
+        StompDispatcher.client = stompClient;
     }
 
     public static void registerService(Service service, String destination) {
@@ -58,48 +57,65 @@ public class StompDispatcher extends BlockingNativeCallableUnit {
 
     public static void extractResource(Service service) {
         int count;
-        for (count = 0; count < service.getResources().length; count++) {
-            // Accessing each element of array
-            String resourceName = service.getResources()[count].getName();
-            if (resourceName.equals("onMessage")) {
-                onMessageResource = service.getResources()[count];
-                resourceRegistry.put("onMessage", onMessageResource);
+        if (service.getResources().length == 2) {
+            for (count = 0; count < service.getResources().length; count++) {
+                // Accessing each element of array
+                String resourceName = service.getResources()[count].getName();
+                if (resourceName.equals("onMessage")) {
+                    onMessageResource = service.getResources()[count];
+                    resourceRegistry.put("onMessage", onMessageResource);
+                } else {
+                    log.error("onMessage resource was not found");
+                }
+                if (resourceName.equals("onError")) {
+                    onErrorResource = service.getResources()[count];
+                    resourceRegistry.put("onError", onErrorResource);
+                } else {
+                    log.error("onError resource was not found");
+                }
             }
-            if (resourceName.equals("onError")) {
-                onErrorResource = service.getResources()[count];
-                resourceRegistry.put("onError", onErrorResource);
-            }
+        } else {
+            log.error("We can have, only 2 resources");
         }
     }
 
     public static void executeOnMessage(String messageId, String body, String destination) {
         Service service = serviceRegistry.get(destination);
         extractResource(service);
+
         onMessageResource = resourceRegistry.get("onMessage");
 
         Annotation serviceAnnotation = getServiceConfigAnnotation(service);
         Struct annotationValue = serviceAnnotation.getValue();
         String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
 
-        ProgramFile programFile = onMessageResource.getResourceInfo().getPackageInfo().getProgramFile();
-        BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile,
-                StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
-        List<ParamDetail> paramDetails = onMessageResource.getParamDetails();
-        String callerType = paramDetails.get(0).getVarType().toString();
+        if (onMessageResource != null) {
+            ProgramFile programFile = onMessageResource.getResourceInfo().getPackageInfo().getProgramFile();
+            BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile,
+                    StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
+            List<ParamDetail> paramDetails = onMessageResource.getParamDetails();
+            if (paramDetails.get(0) != null) {
+                String callerType = paramDetails.get(0).getVarType().toString();
 
-        if (callerType.equals("string")) {
-            Executor.submit(onMessageResource, new ResponseCallback(),
-                    new HashMap<>(), null, new BString(body));
-        } else if (callerType.equals("ballerina/stomp:Message")) {
-            msgObj.addNativeData(StompConstants.STOMP_MSG, body);
-            msgObj.put(StompConstants.MSG_CONTENT_NAME, new BString(body));
-            msgObj.put(StompConstants.MSG_DESTINATION, new BString(destination));
-            msgObj.put(StompConstants.MSG_ID, new BString(messageId));
-            msgObj.put(StompConstants.ACK_MODE, new BString(ackMode));
-            msgObj.addNativeData(StompConstants.ACK_MODE, ackMode);
-            msgObj.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, client);
-            Executor.submit(onMessageResource, new ResponseCallback(),
-                    new HashMap<>(), null, msgObj);
+                if (callerType.equals("string")) {
+                    Executor.submit(onMessageResource, new ResponseCallback(),
+                            new HashMap<>(), null, new BString(body));
+                } else if (callerType.equals("ballerina/stomp:Message")) {
+                    msgObj.addNativeData(StompConstants.STOMP_MSG, body);
+                    msgObj.put(StompConstants.MSG_CONTENT_NAME, new BString(body));
+                    msgObj.put(StompConstants.MSG_DESTINATION, new BString(destination));
+                    msgObj.put(StompConstants.MSG_ID, new BString(messageId));
+                    msgObj.put(StompConstants.ACK_MODE, new BString(ackMode));
+                    msgObj.addNativeData(StompConstants.ACK_MODE, ackMode);
+                    msgObj.addNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ, client);
+                    Executor.submit(onMessageResource, new ResponseCallback(),
+                            new HashMap<>(), null, msgObj);
+                }
+            } else {
+                log.error("onMessage resource doesn't not have any parameter");
+            }
+        } else {
+            log.error("onMessage resource was not found");
         }
     }
 
@@ -117,11 +133,15 @@ public class StompDispatcher extends BlockingNativeCallableUnit {
 
     public static void executeOnError(String message, String description) {
         onErrorResource = resourceRegistry.get("onError");
-        try {
-            Executor.submit(onErrorResource, new ResponseCallback(),
-                    null, null, getErrorSignatureParameters(onErrorResource, description));
-        } catch (BallerinaConnectorException c) {
-            log.error("Error while executing onError resource", c);
+        if (onErrorResource != null) {
+            try {
+                Executor.submit(onErrorResource, new ResponseCallback(),
+                        null, null, getErrorSignatureParameters(onErrorResource, description));
+            } catch (BallerinaConnectorException c) {
+                log.error("Error while executing onError resource", c);
+            }
+        } else {
+            log.error("onError resource was not found");
         }
     }
 

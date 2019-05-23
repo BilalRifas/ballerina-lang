@@ -66,7 +66,7 @@ public class Start implements NativeCallableUnit {
             start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
             String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
 
-            // get stompClient object created in intListener
+            // Get stompClient object created in intListener.
             DefaultStompClient client = (DefaultStompClient)
                     start.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
 
@@ -74,7 +74,7 @@ public class Start implements NativeCallableUnit {
 
             CountDownLatch signal = new CountDownLatch(1);
 
-            // Connect to STOMP server, send CONNECT command and wait CONNECTED answer
+            // Connect to STOMP server, send CONNECT command and wait CONNECTED answer.
             client.setCountDownLatch(signal);
 
             client.connect();
@@ -90,7 +90,7 @@ public class Start implements NativeCallableUnit {
                 Thread.currentThread().interrupt();
             }
 
-            // Change variable name to destination Map or something
+            // Change variable name to destination Map or something.
             Map<String, Service> destinationMap = StompDispatcher.getServiceRegistryMap();
             for (Map.Entry<String, Service> entry : destinationMap.entrySet()) {
                 String subscribeDestination = entry.getKey();
@@ -98,7 +98,7 @@ public class Start implements NativeCallableUnit {
             }
 
             // It is essential to keep a non-daemon thread running in order to avoid the java program or the
-            // Ballerina service from exiting
+            // Ballerina service from exiting.
             new Thread(() -> {
                 try {
                     countDownLatch.await();

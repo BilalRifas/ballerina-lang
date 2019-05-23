@@ -1,6 +1,5 @@
 package org.ballerinalang.stdlib.stomp.message;
 
-import org.ballerinalang.stdlib.stomp.externimpl.consumer.Start;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 import javax.net.SocketFactory;
@@ -18,36 +16,21 @@ import javax.net.ssl.SSLSocketFactory;
  *
  * @since 0.995.0
  */
-public abstract class StompClient {
-    private static final Logger log = LoggerFactory.getLogger(Start.class);
-    private final URI uri;
-
-    private Socket socket;
-    private String sessionId;
-
+public abstract class StompListener {
+    private static final Logger log = LoggerFactory.getLogger(StompListener.class);
+    private final URI connectionUri;
     private Thread readerThread;
     private volatile boolean running = true;
+    private Socket socketConnection;
+    private String sessionId;
 
-    public StompClient() throws URISyntaxException {
-        this("tcp://localhost:61613");
+    public StompListener(URI uri) {
+        this.connectionUri = uri;
     }
 
-    public StompClient(String url) throws URISyntaxException {
-        this(new URI(url));
-    }
-
-    public StompClient(URI uri) {
-        this.uri = uri;
-    }
-
-    // customs handlers.
     public abstract void onConnected(String sessionId);
 
-    public abstract void onDisconnected();
-
     public abstract void onMessage(String messageId, String body, String destination);
-
-    public abstract void onReceipt(String receiptId);
 
     public abstract void onError(String message, String description);
 
@@ -55,39 +38,41 @@ public abstract class StompClient {
 
     public void connect() {
         try {
-            // connecting to STOMP server
-            if (uri.getScheme().equals("tcp")) {
-                socket = new Socket(this.uri.getHost(), this.uri.getPort());
-            } else if (uri.getScheme().equals("tcps")) {
+            // Connecting to STOMP broker.
+            if (connectionUri.getScheme().equals("tcp")) {
+                socketConnection = new Socket(this.connectionUri.getHost(), this.connectionUri.getPort());
+            } else if (connectionUri.getScheme().equals("tcps")) {
                 SocketFactory socketFactory = SSLSocketFactory.getDefault();
-                socket = socketFactory.createSocket(this.uri.getHost(), this.uri.getPort());
+                socketConnection = socketFactory.createSocket(
+                        this.connectionUri.getHost(), this.connectionUri.getPort());
             } else {
                 throw new StompException("Library is not support this scheme");
             }
 
-            // initialize reader thread.
+            // Initialize reader thread.
             readerThread = new Thread(new Runnable() {
                 public void run() {
                     reader();
                 }
             });
 
-            // run reader thread.
+            // Start reader thread.
             readerThread.start();
 
-            // sending CONNECT command.
-            StompFrame connectFrame = new StompFrame(StompCommand.CONNECT);
-            if (uri.getUserInfo() != null) {
-                String[] credentials = uri.getUserInfo().split(":");
+            // Sending CONNECT command.
+            StompFrame connectionFrame = new StompFrame(StompCommand.CONNECT);
+            if (connectionUri.getUserInfo() != null) {
+                String[] credentials = connectionUri.getUserInfo().split(":");
                 if (credentials.length == 2) {
-                    connectFrame.header.put("login", credentials[0]);
-                    connectFrame.header.put("passcode", credentials[1]);
+                    connectionFrame.header.put("login", credentials[0]);
+                    connectionFrame.header.put("passcode", credentials[1]);
+                    connectionFrame.header.put("client-id", "clientId_123");
                 }
             }
 
-            send(connectFrame);
+            sendFrame(connectionFrame);
 
-            // wait CONNECTED server command.
+            // Wait for CONNECTED broker command.
             synchronized (this) {
                 wait();
             }
@@ -105,7 +90,7 @@ public abstract class StompClient {
 
     private void reader() {
         try {
-            InputStream in = this.socket.getInputStream();
+            InputStream in = this.socketConnection.getInputStream();
             StringBuilder sb = new StringBuilder();
             while (running) {
                 try {
@@ -138,13 +123,6 @@ public abstract class StompClient {
                             sessionId = frame.header.get("session");
                             onConnected(sessionId);
                             break;
-                        case DISCONNECTED:
-                            onDisconnected();
-                            break;
-                        case RECEIPT:
-                            String receiptId = frame.header.get("receipt-id");
-                            onReceipt(receiptId);
-                            break;
                         case MESSAGE:
                             String messageId = frame.header.get("message-id");
                             String messageDestination = frame.header.get("destination");
@@ -157,7 +135,6 @@ public abstract class StompClient {
                         default:
                             break;
                     }
-
                 } catch (IOException e) {
                     onCriticalError(e);
                     return;
@@ -174,31 +151,13 @@ public abstract class StompClient {
         frame.header.put("destination", destination);
         frame.header.put("session", sessionId);
         frame.header.put("ack", ack);
-        send(frame);
+        sendFrame(frame);
     }
 
-    public void ack(String messageId) {
+    public void acknowledge(String messageId) {
         StompFrame frame = new StompFrame(StompCommand.ACK);
         frame.header.put("message-id", messageId);
-        send(frame);
-    }
-
-    // Acknowledge message with transaction.
-    public void ack(String messageId, String transaction) {
-        StompFrame frame = new StompFrame(StompCommand.ACK);
-        frame.header.put("message-id", messageId);
-        frame.header.put("transaction", transaction);
-        send(frame);
-    }
-
-    private synchronized void send(StompFrame frame) {
-        try {
-            socket.getOutputStream().write(frame.getBytes());
-        } catch (IOException e) {
-            StompException ex = new StompException("Problem with sending frame");
-            ex.initCause(e);
-            throw ex;
-        }
+        sendFrame(frame);
     }
 
     // Durable subscribe
@@ -211,7 +170,17 @@ public abstract class StompClient {
         frame.header.put("id", uuid);
         frame.header.put("durable", "true");
 //        frame.header.put("auto-delete", "false");
-        send(frame);
+        frame.header.put("client-id", uuid);
+        sendFrame(frame);
     }
 
+    private synchronized void sendFrame(StompFrame frame) {
+        try {
+            socketConnection.getOutputStream().write(frame.getBytes());
+        } catch (IOException e) {
+            StompException ex = new StompException("Problem with sending frame");
+            ex.initCause(e);
+            throw ex;
+        }
+    }
 }
