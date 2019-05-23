@@ -80,7 +80,7 @@ public class Start implements NativeCallableUnit {
             client.connect();
 
             try {
-                // TODO: Implement Retry method after timeout
+                // TODO: Implement Retry attempt method after timeout
                 if (!signal.await(60, TimeUnit.SECONDS)) {
                     log.debug("Connection time exceeded");
                     throw new BallerinaException(new TimeoutException());

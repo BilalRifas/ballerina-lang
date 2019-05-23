@@ -27,7 +27,7 @@ service stompListenerSports on consumerEndpoint  {
         log:printInfo(content);
     }
 
-    // // This resource is invoked when the connection is interrupted.
+    // This resource is invoked when the connection is interrupted.
     resource function onError(error er) {
         log:printError("An error occured", err = er);
     }

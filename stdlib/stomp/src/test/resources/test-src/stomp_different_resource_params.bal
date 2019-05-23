@@ -28,6 +28,6 @@ service stompConsumer on new stomp:Listener({
         vhost: "/",
         acceptVersion: "1.1"
     }) {
-    resource function onMessage(stomp:Message message) returns error? {
+    resource function onMessage(stomp:Caller caller) returns error? {
     }
 }

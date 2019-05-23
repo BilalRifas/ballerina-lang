@@ -50,6 +50,12 @@ public class StompConstants {
     public static final String ACK_AUTO = "auto";
     public static final String ACK_CLIENT = "client";
     public static final String ACK_CLIENT_INDIVIDUAL = "client-individual";
+
+    static final String MESSAGE_OBJ_FULL_NAME = STOMP_PACKAGE + ":" + MESSAGE_OBJ;
+
+    // Warning suppression
+    public static final String UNCHECKED = "unchecked";
+
     public static final String COUNTDOWN_LATCH = "countdown-latch";
 
     // Error related constants

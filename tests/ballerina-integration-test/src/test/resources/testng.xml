@@ -271,6 +271,11 @@
         </classes>
     </test>
 
+    <test name="ballerina-stomp-tests" parallel="false">
+        <classes>
+
+        </classes>
+    </test>
     <test name="artemis-test" parallel="false">
         <classes>
             <class name="org.ballerinalang.test.messaging.artemis.ArtemisTestCommons"/>

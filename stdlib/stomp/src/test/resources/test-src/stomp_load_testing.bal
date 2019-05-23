@@ -14,22 +14,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// This is the publisher implementation for STOMP protocol.
 import ballerina/stomp;
 
-@stomp:ServiceConfig {
-    destination:"/queue/sports",
-    ackMode: stomp:AUTO
-}
-service stompConsumer on new stomp:Listener({
+// This initializes a STOMP connection with the STOMP broker.
+stomp:Sender stompSender = new({
         host: "localhost",
         port: 61613,
         login: "guest",
         passcode: "guest",
         vhost: "/",
         acceptVersion: "1.1"
-    }) {
-    resource function onMessage() returns error? {
-    }
-    resource function onError() returns error? {
-    }
+    });
+
+public function main() {
+        // This sends the Ballerina message to the stomp broker.
+        string message = "CONNECT" + "\n" + "accept-version:1.0,1.1,2.0" + "\n" + "host:stomp.github.org" + "\n" + "^@";
+        string destination = "/queue/sports";
+        var publish = stompSender->send(message,destination);
+        var disconnect = stompSender->disconnect();
 }
