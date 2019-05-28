@@ -14,10 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// This is the publisher implementation for STOMP protocol.
 import ballerina/stomp;
 
-// This initializes a STOMP connection with the STOMP broker.
 stomp:Sender stompSender = new({
         host: "localhost",
         port: 61613,
@@ -27,9 +25,8 @@ stomp:Sender stompSender = new({
         acceptVersion: "1.1"
     });
 
-public function main() {
-        // This sends the Ballerina message to the stomp broker.
-        string message = "Hello World from Ballerina";
+public function testClientIndividualAckSend() {
+        string message = "Hello World with client-individual ack";
         string destination = "/queue/sports";
         var publish = stompSender->send(message,destination);
         var disconnect = stompSender->disconnect();

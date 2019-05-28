@@ -68,7 +68,6 @@ public class DefaultStompClient extends StompListener {
 
     @Override
     public void onCriticalError(Exception e) {
-        log.error("Error: ", e);
-        // It's not implemented in Ballerina yet
+        // It's not implemented in Ballerina yet.
     }
 }

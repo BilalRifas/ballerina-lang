@@ -23,7 +23,7 @@ under the License.
     <!-- Ballerina language Test Cases. -->
     <test name="ballerina-lang-test-suite" parallel="false">
         <packages>
-            <package name="org.ballerinalang.stdlib.stomp"/>
+            <package name="org.ballerinalang.stomp"/>
         </packages>
     </test>
 </suite>

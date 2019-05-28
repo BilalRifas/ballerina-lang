@@ -15,19 +15,29 @@
 // under the License.
 
 import ballerina/stomp;
+import ballerina/io;
 
-@stomp:ServiceConfig {
-    destination:"/queue/sports",
-    ackMode: stomp:AUTO
-}
-service stompConsumer on new stomp:Listener({
+listener stomp:Listener simpleConsumerEndpoint = new({
         host: "localhost",
         port: 61613,
         login: "guest",
         passcode: "guest",
         vhost: "/",
         acceptVersion: "1.1"
-    }) {
-    resource function onMessage(stomp:Caller caller) returns error? {
-    }
+    });
+
+@stomp:ServiceConfig{
+        destination:"/queue/sports",
+        ackMode: stomp:AUTO
+}
+
+service stompListener on simpleConsumerEndpoint  {
+        resource function onMessage(stomp:Message message) {
+            var content = message.getContent();
+            io:println("received: " + content);
+        }
+
+        resource function onError(error er) {
+                log:printError("An error occured", err = er);
+        }
 }

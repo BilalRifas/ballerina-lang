@@ -41,7 +41,7 @@ public class StompDispatcher {
 
     public void execute(Context context) {
         BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
-        // Get stompClient object created in intListener
+        // Get stompClient object created in intListener.
         DefaultStompClient stompClient = (DefaultStompClient)
                 connection.getNativeData(StompConstants.CONFIG_FIELD_CLIENT_OBJ);
         StompDispatcher.client = stompClient;

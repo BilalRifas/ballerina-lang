@@ -51,7 +51,7 @@ public type Listener object {
 
 public type StompServiceConfig record {
     string destination = "";
-    AckType ackMode = CLIENT;
+    AckType ackMode = AUTO;
     boolean durable = false;
 };
 
@@ -59,12 +59,12 @@ public annotation<service> ServiceConfig StompServiceConfig;
 
 # Represents the socket server configuration.
 #
-# + host - host to connect the tcp socket
-# + port - port to connect the tcp socket
-# + login - the login username for broker
-# + passcode - the password for broker
-# + vhost - virtual host
-# + acceptVersion - accept version supported by broker & listener
+# + host - host to connect the tcp socket.
+# + port - port to connect the tcp socket.
+# + login - the login username for broker.
+# + passcode - the password for broker.
+# + vhost - virtual host.
+# + acceptVersion - accept version supported by broker & listener.
 public type ListenerConfig record {
     string host = "";
     int port = 0;

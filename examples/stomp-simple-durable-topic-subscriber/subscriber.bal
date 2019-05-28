@@ -14,9 +14,9 @@ listener stomp:Listener consumerEndpoint = new({
 
 // Add service config
 @stomp:ServiceConfig{
-        destination:"/topic/sports",
+        destination:"/topic/my-durable",
         ackMode: stomp:AUTO,
-        durable:true
+        durable: true
 }
 
 // This binds the created consumer to the listener service.

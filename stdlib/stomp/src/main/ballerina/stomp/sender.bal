@@ -19,7 +19,7 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/system;
 
-# Configurations related to a STOMP connection
+# Configurations related to a STOMP connection.
 #
 # + host - STOMP provider url.
 # + port - STOMP port.
@@ -74,6 +74,8 @@ public type Sender client object {
     public remote function send(string message, string destination) returns error?;
 
     public remote function disconnect() returns error?;
+
+    public remote function readReceipt() returns error?;
 };
 
 public type ConnectionConfiguration record {
@@ -104,6 +106,8 @@ public remote function Sender.connect(ConnectionConfiguration stompConfig) retur
         io:println("Unable to write the connect frame", writeResult);
     }
     io:println("Successfully connected to stomp broker");
+
+    var readReceipt = self->readReceipt();
     return;
 }
 
@@ -123,14 +127,17 @@ public remote function Sender.send(string message, string destination) returns e
         io:println("Unable to write the connect frame", writeResult);
     }
     io:println("Message: ", message ," is sent successfully");
+
+    var readReceipt = self->readReceipt();
     return;
 }
 
 public remote function Sender.disconnect() returns error?{
     socket:Client socketClient = self.socketClient;
 
+    string disconnectId = system:uuid();
     // DISCONNECT frame to disconnect.
-    string disconnect = "DISCONNECT" + "\n" + "\n" + self.endOfFrame;
+    string disconnect = "DISCONNECT" + "\n" + "receipt:" + disconnectId + "\n" + "\n" + self.endOfFrame;
 
     byte[] payloadByte = disconnect.toByteArray("UTF-8");
     // Send desired content to the server using the write function.
@@ -138,14 +145,40 @@ public remote function Sender.disconnect() returns error?{
     if (writeResult is error) {
         io:println("Unable to write the connect frame", writeResult);
     }
+    //
+    var readReceipt = self->readReceipt();
     io:println("Disconnected from stomp broker successfully");
-
     // Close the connection between the server and the client.
     var closeResult = socketClient->close();
     if (closeResult is error) {
         io:println(closeResult);
     } else {
         io:println("Client connection closed successfully.");
+    }
+    return;
+}
+
+public remote function Sender.readReceipt() returns error?{
+    socket:Client socketClient = self.socketClient;
+    var result = socketClient->read();
+    if (result is (byte[], int)) {
+        var (content, length) = result;
+        if (length > 0) {
+            io:ReadableByteChannel byteChannel =
+                io:createReadableChannel(content);
+            io:ReadableCharacterChannel characterChannel =
+                new io:ReadableCharacterChannel(byteChannel, "UTF-8");
+            var str = characterChannel.read(300);
+            if (str is string) {
+                io:println(untaint str);
+            } else {
+                io:println("Error while reading characters ", str);
+            }
+        } else {
+            io:println("Client close: ", socketClient.remotePort);
+        }
+    } else {
+        io:println(result);
     }
     return;
 }
@@ -159,21 +192,7 @@ service ClientService = service {
     }
 
     // This is invoked when the server sends any content.
-    resource function onReadReady(socket:Caller caller, byte[] content) {
-        io:ReadableByteChannel byteChannel = io:createReadableChannel(content);
-        io:ReadableCharacterChannel characterChannel =
-        new io:ReadableCharacterChannel(byteChannel, "UTF-8");
-        var str = characterChannel.read(300);
-        if (str is string) {
-            io:println(untaint str);
-        } else {
-            io:println(str);
-        }
-    }
-
-    // This is invoked once the connection is closed.
-    resource function onClose(socket:Caller caller) {
-        io:println("Leave from: ", caller.remotePort);
+    resource function onReadReady(socket:Caller caller) {
     }
 
     // This resource is invoked for the error situation

@@ -23,6 +23,7 @@ public abstract class StompListener {
     private volatile boolean running = true;
     private Socket socketConnection;
     private String sessionId;
+    private String clientUuid;
 
     public StompListener(URI uri) {
         this.connectionUri = uri;
@@ -59,6 +60,7 @@ public abstract class StompListener {
             // Start reader thread.
             readerThread.start();
 
+            String uuid = UUID.randomUUID().toString().replace("-", "");
             // Sending CONNECT command.
             StompFrame connectionFrame = new StompFrame(StompCommand.CONNECT);
             if (connectionUri.getUserInfo() != null) {
@@ -66,7 +68,8 @@ public abstract class StompListener {
                 if (credentials.length == 2) {
                     connectionFrame.header.put("login", credentials[0]);
                     connectionFrame.header.put("passcode", credentials[1]);
-                    connectionFrame.header.put("client-id", "clientId_123");
+                    connectionFrame.header.put("client-id", uuid);
+                    this.clientUuid = uuid;
                 }
             }
 
@@ -88,33 +91,42 @@ public abstract class StompListener {
         }
     }
 
+//    public void retryConnect() {
+//        int retryCount;
+//        int countLimit = 3;
+//
+//        for (retryCount = 0; retryCount < countLimit; retryCount++) {
+//            this.connect();
+//        }
+//    }
+
     private void reader() {
         try {
-            InputStream in = this.socketConnection.getInputStream();
-            StringBuilder sb = new StringBuilder();
+            InputStream inputStream = this.socketConnection.getInputStream();
+            StringBuilder stringBuilder = new StringBuilder();
             while (running) {
                 try {
-                    sb.setLength(0);
-                    int ch;
+                    stringBuilder.setLength(0);
+                    int character;
 
-                    // skip lead trash.
+                    // Skip lead trash.
                     do {
-                        ch = in.read();
-                        if (ch < 0) {
+                        character = inputStream.read();
+                        if (character < 0) {
                             onCriticalError(new IOException("stomp server disconnected!"));
                             return;
                         }
-                    } while (ch < 'A' || ch > 'Z');
+                    } while (character < 'A' || character > 'Z');
 
-                    // read frame.
+                    // Read frame.
                     do {
-                        sb.append((char) ch);
-                    } while ((ch = in.read()) != 0);
+                        stringBuilder.append((char) character);
+                    } while ((character = inputStream.read()) != 0);
 
-                    // parsing raw data to StompFrame format.
-                    StompFrame frame = StompFrame.parse(sb.toString());
+                    // Parsing raw data to StompFrame format.
+                    StompFrame frame = StompFrame.parse(stringBuilder.toString());
 
-                    // run handlers.
+                    // Run handlers.
                     switch (frame.command) {
                         case CONNECTED:
                             synchronized (this) {
@@ -154,13 +166,6 @@ public abstract class StompListener {
         sendFrame(frame);
     }
 
-    public void acknowledge(String messageId) {
-        StompFrame frame = new StompFrame(StompCommand.ACK);
-        frame.header.put("message-id", messageId);
-        sendFrame(frame);
-    }
-
-    // Durable subscribe
     public void durableSubscribe(String destination, String ack) {
         StompFrame frame = new StompFrame(StompCommand.SUBSCRIBE);
         frame.header.put("destination", destination);
@@ -169,8 +174,14 @@ public abstract class StompListener {
         String uuid = UUID.randomUUID().toString().replace("-", "");
         frame.header.put("id", uuid);
         frame.header.put("durable", "true");
-//        frame.header.put("auto-delete", "false");
-        frame.header.put("client-id", uuid);
+        frame.header.put("auto-delete", "false");
+        frame.header.put("client-id", this.clientUuid);
+        sendFrame(frame);
+    }
+
+    public void acknowledge(String messageId) {
+        StompFrame frame = new StompFrame(StompCommand.ACK);
+        frame.header.put("message-id", messageId);
         sendFrame(frame);
     }
 

@@ -14,11 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// This is the publisher implementation for STOMP protocol.
 import ballerina/stomp;
+import ballerina/log;
+import ballerina/io;
 
-// This initializes a STOMP connection with the STOMP broker.
-stomp:Sender stompSender = new({
+int limitCount = 1;
+
+listener stomp:Listener consumerEndpointClientAck = new({
         host: "localhost",
         port: 61613,
         login: "guest",
@@ -27,10 +29,24 @@ stomp:Sender stompSender = new({
         acceptVersion: "1.1"
     });
 
-public function main() {
-        // This sends the Ballerina message to the stomp broker.
-        string message = "CONNECT" + "\n" + "accept-version:1.0,1.1,2.0" + "\n" + "host:stomp.github.org" + "\n" + "^@";
-        string destination = "/queue/sports";
-        var publish = stompSender->send(message,destination);
-        var disconnect = stompSender->disconnect();
+@stomp:ServiceConfig{
+        destination:"/queue/sports",
+        ackMode: stomp:CLIENT
+}
+
+service stompListenerClientAck on consumerEndpointClientAck  {
+    resource function onMessage(stomp:Message message) {
+        var content = message.getContent();
+        io:println("received: " + content);
+        if (limitCount < 5) {
+            limitCount= limitCount + 1;
+        } else {
+            limitCount = 0;
+            var messageAck = message.ack();
+        }
+    }
+
+    resource function onError(error er) {
+        log:printError("An error occured", err = er);
+    }
 }

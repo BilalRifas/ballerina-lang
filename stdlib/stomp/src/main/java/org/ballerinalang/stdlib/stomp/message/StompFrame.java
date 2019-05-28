@@ -14,17 +14,9 @@ public class StompFrame {
     public Map<String, String> header = new HashMap<>();
     public String body;
 
-    /**
-     * constructor.
-     */
     public StompFrame() {
     }
 
-    /**
-     * constructor.
-     *
-     * @param command type of frame
-     */
     public StompFrame(StompCommand command) {
         this.command = command;
     }
@@ -34,19 +26,12 @@ public class StompFrame {
                 this.header.toString(), this.body);
     }
 
-    /**
-     * getBytes convert frame object to array of bytes.
-     *
-     * @return array of bytes.
-     */
     public byte[] getBytes() {
         StringBuilder frame = new StringBuilder(this.command.toString() + '\n');
         for (Map.Entry<String, String> entry : this.header.entrySet()) {
             String key = entry.getKey();
             frame.append(key).append(":").append(this.header.get(key)).append('\n');
         }
-
-
 
         frame.append('\n');
 
@@ -57,12 +42,6 @@ public class StompFrame {
         return frame.toString().getBytes(Charset.forName("UTF-8"));
     }
 
-    /**
-     * parse string to frame object.
-     *
-     * @param raw frame as string.
-     * @return frame object.
-     */
     public static StompFrame parse(String raw) {
         StompFrame frame = new StompFrame();
 

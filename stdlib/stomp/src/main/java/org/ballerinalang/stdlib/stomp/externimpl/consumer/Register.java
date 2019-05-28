@@ -61,8 +61,6 @@ public class Register extends BlockingNativeCallableUnit {
         Struct annotationValue = serviceAnnotation.getValue();
         String destination = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DESTINATION);
         String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
-        StompDispatcher dispatcher = new StompDispatcher();
-        dispatcher.execute(context);
 
         if (ackMode.equals(StompConstants.ACK_AUTO) || ackMode.equals(StompConstants.ACK_CLIENT) ||
                 ackMode.equals(StompConstants.ACK_CLIENT_INDIVIDUAL)) {
@@ -79,9 +77,7 @@ public class Register extends BlockingNativeCallableUnit {
         }
 
         boolean durableFlag = annotationValue.getBooleanField(StompConstants.CONFIG_FIELD_DURABLE);
-        if (durableFlag) {
-            connection.addNativeData(StompConstants.CONFIG_FIELD_DURABLE, true);
-        }
+        connection.addNativeData(StompConstants.CONFIG_FIELD_DURABLE, durableFlag);
 
         StompDispatcher.registerService(service, destination);
 

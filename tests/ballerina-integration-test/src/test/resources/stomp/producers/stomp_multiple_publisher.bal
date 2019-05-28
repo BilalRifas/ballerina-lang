@@ -14,20 +14,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Defines the possible values for the ack type in STOMP `ACKNOWLEDGEMENT`.
-#
-# `auto`: ACK type auto
-# `client`: ACK type client
-# `client-individual`: ACK type client-individual
-public type AckType AUTO|CLIENT|CLIENTINDIVIDUAL;
+import ballerina/stomp;
 
-# Constant for STOMP ack type auto.
-public const AUTO = "auto";
+stomp:Sender stompSender = new({
+        host: "localhost",
+        port: 61613,
+        login: "guest",
+        passcode: "guest",
+        vhost: "/",
+        acceptVersion: "1.1"
+    });
 
-# Constant for STOMP ack type client.
-public const CLIENT = "client";
-
-# Constant for STOMP ack type client-individual.
-public const CLIENTINDIVIDUAL = "client-individual";
-
-
+public function testMultipleSend() {
+        string message1 = "Hello World From Ballerina - Sports";
+        string message2 = "Hello World From Ballerina - News";
+        string destination1 = "/queue/sports";
+        string destination2 = "/queue/news";
+        var publish1 = stompSender->send(message1,destination1);
+        var publish2 = stompSender->send(message2,destination2);
+        var disconnect = stompSender->disconnect();
+}

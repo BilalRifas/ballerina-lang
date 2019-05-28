@@ -16,20 +16,18 @@
 
 import ballerina/stomp;
 
-@stomp:ServiceConfig {
-    destination:"/queue/sports",
-    ackMode: stomp:AUTO
-}
-service stompConsumer on new stomp:Listener({
+stomp:Sender stompSender = new({
         host: "localhost",
         port: 61613,
         login: "guest",
         passcode: "guest",
         vhost: "/",
         acceptVersion: "1.1"
-    }) {
-    resource function onMessage() returns error? {
-    }
-    resource function onError() returns error? {
-    }
+    });
+
+public function testDurableTopicSend() {
+        string message = "Hello World with durable topic subscription";
+        string destination = "/topic/my-durable";
+        var publish = stompSender->send(message,destination);
+        var disconnect = stompSender->disconnect();
 }

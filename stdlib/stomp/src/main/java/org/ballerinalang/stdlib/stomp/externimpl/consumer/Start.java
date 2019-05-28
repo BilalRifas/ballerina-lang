@@ -65,6 +65,9 @@ public class Start implements NativeCallableUnit {
             BMap<String, BValue> start = (BMap<String, BValue>) context.getRefArgument(0);
             start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
             String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
+            boolean durableFlag = (boolean) start.getNativeData(StompConstants.CONFIG_FIELD_DURABLE);
+            StompDispatcher dispatcher = new StompDispatcher();
+            dispatcher.execute(context);
 
             // Get stompClient object created in intListener.
             DefaultStompClient client = (DefaultStompClient)
@@ -94,7 +97,11 @@ public class Start implements NativeCallableUnit {
             Map<String, Service> destinationMap = StompDispatcher.getServiceRegistryMap();
             for (Map.Entry<String, Service> entry : destinationMap.entrySet()) {
                 String subscribeDestination = entry.getKey();
-                client.subscribe(subscribeDestination, ackMode);
+                if (durableFlag) {
+                    client.durableSubscribe(subscribeDestination, ackMode);
+                } else {
+                    client.subscribe(subscribeDestination, ackMode);
+                }
             }
 
             // It is essential to keep a non-daemon thread running in order to avoid the java program or the

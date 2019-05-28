@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Includes common functionality for Artemis test cases.
+ * Includes common functionality for Stomp test cases.
  */
 public class StompTestCommons extends BaseTest {
     private static final Logger log = LoggerFactory.getLogger(StompTestCommons.class);
@@ -42,7 +42,7 @@ public class StompTestCommons extends BaseTest {
 
     @BeforeGroups(value = "stomp-test", alwaysRun = true)
     public void start() throws BallerinaTestException {
-        Path path = Paths.get("src", "test", "resources", "messaging", "stomp");
+        Path path = Paths.get("src", "test", "resources", "stomp");
 
         // Start broker
         embeddedBroker = new EmbeddedActiveMQ();
@@ -56,7 +56,7 @@ public class StompTestCommons extends BaseTest {
 
         // Start Ballerina server
         serverInstance = new BServerInstance(balServer);
-        serverInstance.startServer(path.toAbsolutePath().toString(), "consumers",
+        serverInstance.startServer(path.toAbsolutePath().toString(), "consumers", new String[]{"--experimental"},
                                    new int[]{});
     }
 
