@@ -37,6 +37,20 @@ public class StompUtils {
     private static final String STOMP_ERROR_CODE = "{ballerina/stomp}StompError";
     private static final String STOMP_ERROR = "StompError";
 
+    public static BError createStompError(Context context, String errMsg) {
+        BMap<String, BValue> errorRecord = BLangConnectorSPIUtil.createBStruct(context,
+                StompConstants.STOMP_PACKAGE, STOMP_ERROR);
+        errorRecord.put("message", new BString(errMsg));
+        return BLangVMErrors.createError(context, true, BTypes.typeError, STOMP_ERROR_CODE, errorRecord);
+    }
+
+    public static BError createStompError(ProgramFile programFile, String errMsg) {
+        BMap<String, BValue> errorRecord = BLangConnectorSPIUtil
+                .createBStruct(programFile, StompConstants.STOMP_PACKAGE, STOMP_ERROR);
+        errorRecord.put("message", new BString(errMsg));
+        return BLangVMErrors.createError(STOMP_ERROR_CODE, errorRecord);
+    }
+
     /**
      * GetError
      * @param context Represent ballerina context
@@ -62,12 +76,5 @@ public class StompUtils {
         } else {
             return getError(context, exception.getMessage());
         }
-    }
-
-    public static BError createStompError(ProgramFile programFile, String errMsg) {
-        BMap<String, BValue> errorRecord = BLangConnectorSPIUtil
-                .createBStruct(programFile, StompConstants.STOMP_PACKAGE, STOMP_ERROR);
-        errorRecord.put("message", new BString(errMsg));
-        return BLangVMErrors.createError(STOMP_ERROR_CODE, errorRecord);
     }
 }

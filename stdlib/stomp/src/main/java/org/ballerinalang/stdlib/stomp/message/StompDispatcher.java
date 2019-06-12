@@ -17,7 +17,6 @@ import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.services.ErrorHandlerUtils;
 import org.ballerinalang.stdlib.stomp.StompConstants;
-import org.ballerinalang.stdlib.stomp.StompUtils;
 import org.ballerinalang.util.codegen.ProgramFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class StompDispatcher {
     private static Resource onErrorResource;
     private static DefaultStompClient client;
 
-    public void execute(Context context) {
+    public static void execute(Context context) {
         BMap<String, BValue> connection = (BMap<String, BValue>) context.getRefArgument(0);
         // Get stompClient object created in intListener.
         DefaultStompClient stompClient = (DefaultStompClient)
@@ -64,14 +63,11 @@ public class StompDispatcher {
                 if (resourceName.equals("onMessage")) {
                     onMessageResource = service.getResources()[count];
                     resourceRegistry.put("onMessage", onMessageResource);
-                } else {
-                    log.error("onMessage resource was not found");
                 }
+
                 if (resourceName.equals("onError")) {
                     onErrorResource = service.getResources()[count];
                     resourceRegistry.put("onError", onErrorResource);
-                } else {
-                    log.error("onError resource was not found");
                 }
             }
         } else {
@@ -79,7 +75,7 @@ public class StompDispatcher {
         }
     }
 
-    public static void executeOnMessage(String messageId, String body, String destination) {
+    public static void executeOnMessage(String messageId, String body, String destination, String replyToDestination) {
         Service service = serviceRegistry.get(destination);
         extractResource(service);
 
@@ -99,11 +95,12 @@ public class StompDispatcher {
 
                 if (callerType.equals("string")) {
                     Executor.submit(onMessageResource, new ResponseCallback(),
-                            new HashMap<>(), null, new BString(body));
+                            new HashMap<>(), null, new BString(body), new BString(replyToDestination));
                 } else if (callerType.equals("ballerina/stomp:Message")) {
                     msgObj.addNativeData(StompConstants.STOMP_MSG, body);
                     msgObj.put(StompConstants.MSG_CONTENT_NAME, new BString(body));
                     msgObj.put(StompConstants.MSG_DESTINATION, new BString(destination));
+                    msgObj.put(StompConstants.REPLY_TO_MSG_DESTINATION, new BString(replyToDestination));
                     msgObj.put(StompConstants.MSG_ID, new BString(messageId));
                     msgObj.put(StompConstants.ACK_MODE, new BString(ackMode));
                     msgObj.addNativeData(StompConstants.ACK_MODE, ackMode);
@@ -114,8 +111,6 @@ public class StompDispatcher {
             } else {
                 log.error("onMessage resource doesn't not have any parameter");
             }
-        } else {
-            log.error("onMessage resource was not found");
         }
     }
 
@@ -133,25 +128,20 @@ public class StompDispatcher {
 
     public static void executeOnError(String message, String description) {
         onErrorResource = resourceRegistry.get("onError");
-        if (onErrorResource != null) {
-            try {
-                Executor.submit(onErrorResource, new ResponseCallback(),
-                        null, null, getErrorSignatureParameters(onErrorResource, description));
-            } catch (BallerinaConnectorException c) {
-                log.error("Error while executing onError resource", c);
-            }
-        } else {
-            log.error("onError resource was not found");
-        }
-    }
-
-    private static BValue getErrorSignatureParameters(Resource onErrorResource, String errorMessage) {
         ProgramFile programFile = onErrorResource.getResourceInfo().getPackageInfo().getProgramFile();
         BMap<String, BValue> messageObj = BLangConnectorSPIUtil.createBStruct(
                 programFile, StompConstants.STOMP_PACKAGE, StompConstants.MESSAGE_OBJ);
-        BError error = StompUtils.createStompError(programFile, errorMessage);
-        messageObj.addNativeData(StompConstants.STOMP_MESSAGE, errorMessage);
-        return error;
+        messageObj.addNativeData(StompConstants.STOMP_MESSAGE, message);
+        messageObj.put(StompConstants.STOMP_MESSAGE, new BString(message));
+
+        if (onErrorResource != null) {
+            try {
+                Executor.submit(onErrorResource, new ResponseCallback(),
+                        new HashMap<>(), null, messageObj);
+            } catch (BallerinaConnectorException c) {
+                log.error("Error while executing onError resource", c);
+            }
+        }
     }
 
     private static Annotation getServiceConfigAnnotation(Service service) {

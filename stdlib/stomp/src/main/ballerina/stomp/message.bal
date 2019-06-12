@@ -16,12 +16,17 @@
 
 public type Message object {
     private string content = "";
+    private string replyToDestination = "";
 
     # Get message content.
     #
     # + return - message content as a 'string' liternal.
     public function getContent() returns string {
         return self.content;
+    }
+
+    public function getReplytToDestination() returns string {
+        return self.replyToDestination;
     }
 
     public function ack() returns error? = external;

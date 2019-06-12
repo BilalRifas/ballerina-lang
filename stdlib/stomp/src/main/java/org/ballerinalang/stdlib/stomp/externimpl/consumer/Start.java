@@ -66,8 +66,6 @@ public class Start implements NativeCallableUnit {
             start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
             String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
             boolean durableFlag = (boolean) start.getNativeData(StompConstants.CONFIG_FIELD_DURABLE);
-            StompDispatcher dispatcher = new StompDispatcher();
-            dispatcher.execute(context);
 
             // Get stompClient object created in intListener.
             DefaultStompClient client = (DefaultStompClient)
@@ -76,6 +74,8 @@ public class Start implements NativeCallableUnit {
             client.setCallableUnit(callableUnitCallback);
 
             CountDownLatch signal = new CountDownLatch(1);
+
+            client.setContext(context);
 
             // Connect to STOMP server, send CONNECT command and wait CONNECTED answer.
             client.setCountDownLatch(signal);

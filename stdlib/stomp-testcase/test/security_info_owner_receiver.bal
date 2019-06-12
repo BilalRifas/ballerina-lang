@@ -14,37 +14,57 @@ listener stomp:Listener consumerEndpoint = new({
 
 // Add service config
 @stomp:ServiceConfig{
-    destination:"/queue/sports",
+    destination:"/queue/ownerMotionDetector",
     ackMode: stomp:AUTO
 }
 
 // This binds the created consumer to the listener service.
-service stompListenerSports on consumerEndpoint  {
+service stompMotionDetector on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
-        log:printInfo("StompListener Sports");
+        log:printInfo("Motion detector");
         log:printInfo(content);
     }
 
-    // This resource is invoked when the connection is interrupted.
+    // // This resource is invoked when the connection is interrupted.
     resource function onError(error er) {
         log:printError("An error occured", err = er);
     }
 }
 
 @stomp:ServiceConfig{
-    destination:"/queue/news",
+    destination:"/queue/ownerSmokeDetector",
     ackMode: stomp:AUTO
 }
 
-service stompListenerNews on consumerEndpoint  {
+service stompSmokeDetector on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
-        log:printInfo("StompListener News");
+        log:printInfo("Smoke detector");
+        log:printInfo(content);
+    }
+
+    // // This resource is invoked when the connection is interrupted.
+    resource function onError(error er) {
+        log:printError("An error occured", err = er);
+    }
+}
+
+@stomp:ServiceConfig{
+    destination:"/queue/ownerHeatDetector",
+    ackMode: stomp:AUTO
+}
+
+service stompHeatDetector on consumerEndpoint  {
+    // This resource is invoked when a message is received.
+    // Message object only gives us the string message.
+    resource function onMessage(stomp:Message message) {
+        var content = message.getContent();
+        log:printInfo("Heat detector");
         log:printInfo(content);
     }
 

@@ -21,49 +21,21 @@ import ballerina/system;
 
 # Configurations related to a STOMP connection.
 #
-# + host - STOMP provider url.
-# + port - STOMP port.
-# + config - Config.
-# + login - STOMP user login.
-# + passcode - STOMP passcode.
-# + vhost - default stomp vhost.
-# + acceptVersion - 1.1.
 # + socketClient - socketConnection.
-# + endOfFrame - null octet.
+# + endOfFrame - End of frame used a null octet (^@ = \u0000).
+# + config - ConnectionConfiguration.
 
 public type Sender client object {
-
-    public string host = "";
-    public int port = 0;
-    public string login = "";
-    public string passcode = "";
-    public string vhost = "";
-    public string acceptVersion = "";
     private socket:Client socketClient;
-
-    // End of frame used a null octet (^@ = \u0000).
     public string endOfFrame = "\u0000";
 
-    public ConnectionConfiguration config = {
-        host:host,
-        port:port,
-        login:login,
-        passcode:passcode,
-        vhost:vhost,
-        acceptVersion:acceptVersion
-    };
+    public ConnectionConfiguration config = { };
 
     public function __init(ConnectionConfiguration stompConfig) {
         self.config = stompConfig;
-        self.host = stompConfig.host;
-        self.port = stompConfig.port;
-        self.login = stompConfig.login;
-        self.passcode = stompConfig.passcode;
-        self.vhost = stompConfig.vhost;
-        self.acceptVersion = stompConfig.acceptVersion;
         self.socketClient = new({
-                host: self.host,
-                port: self.port,
+                host: stompConfig.host,
+                port: stompConfig.port,
                 callbackService: ClientService
             });
         var connection = self->connect(stompConfig);
@@ -73,18 +45,20 @@ public type Sender client object {
 
     public remote function send(string message, string destination) returns error?;
 
+    public remote function dualChannelSend(string message, string destination) returns error?;
+
     public remote function disconnect() returns error?;
 
     public remote function readReceipt() returns error?;
 };
 
 public type ConnectionConfiguration record {
-    string host;
-    int port;
-    string login;
-    string passcode;
-    string vhost;
-    string acceptVersion;
+    string host = "";
+    int port = 0;
+    string login  = "";
+    string passcode = "";
+    string vhost = "";
+    string acceptVersion = "";
 };
 
 public remote function Sender.connect(ConnectionConfiguration stompConfig) returns error?{
@@ -124,12 +98,40 @@ public remote function Sender.send(string message, string destination) returns e
     // Send desired content to the server using the write function.
     var writeResult = socketClient->write(payloadByte);
     if (writeResult is error) {
-        io:println("Unable to write the connect frame", writeResult);
+        io:println("Unable to write the send frame", writeResult);
     }
-    io:println("Message: ", message ," is sent successfully");
 
     var readReceipt = self->readReceipt();
     return;
+}
+
+public remote function Sender.dualChannelSend(string message, string destination) returns error?{
+    socket:Client socketClient = self.socketClient;
+
+    // Generating unique id for message receipt.
+    string messageId = system:uuid();
+
+        // SEND frame to send message.
+        string send = "SEND" + "\n" +
+         "destination:" + destination + "\n" +
+         "receipt:" + messageId + "\n" +
+         "redelivered:" + "false" + "\n" +
+         "persistent:" + "false" +
+         "correlation-id" + "stompCorrelationID" +
+         "reply-to:" + destination + "\n" +
+         "content-type:"+"text/plain" + "\n" + "\n" +
+         message + "\n" +
+         self.endOfFrame;
+
+        byte[] payloadByte = send.toByteArray("UTF-8");
+        // Send desired content to the server using the write function.
+        var writeResult = socketClient->write(payloadByte);
+        if (writeResult is error) {
+            io:println("Unable to write the send frame", writeResult);
+        }
+
+        var readReceipt = self->readReceipt();
+        return;
 }
 
 public remote function Sender.disconnect() returns error?{
@@ -143,9 +145,9 @@ public remote function Sender.disconnect() returns error?{
     // Send desired content to the server using the write function.
     var writeResult = socketClient->write(payloadByte);
     if (writeResult is error) {
-        io:println("Unable to write the connect frame", writeResult);
+        io:println("Unable to write the disconnect frame", writeResult);
     }
-    //
+
     var readReceipt = self->readReceipt();
     io:println("Disconnected from stomp broker successfully");
     // Close the connection between the server and the client.
@@ -185,7 +187,6 @@ public remote function Sender.readReceipt() returns error?{
 
 // Callback service for the TCP client. The service needs to have four predefined resources.
 service ClientService = service {
-
     // This is invoked once the client connects to the TCP server.
     resource function onConnect(socket:Caller caller) {
         io:println("Connect to: ", caller.remotePort);
@@ -201,4 +202,3 @@ service ClientService = service {
         io:println(err);
     }
 };
-

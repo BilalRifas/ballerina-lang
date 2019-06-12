@@ -43,6 +43,7 @@ public class StompConstants {
     public static final String STOMP_MESSAGE = "stomp-message";
     public static final String MSG_CONTENT_NAME = "content";
     public static final String MSG_DESTINATION = "destination";
+    public static final String REPLY_TO_MSG_DESTINATION = "replyTo-destination";
     public static final String STOMP_MSG = "STOMPMSG";
     public static final String MSG_ID = "message-id";
     public static final String MESSAGE_OBJ = "Message";

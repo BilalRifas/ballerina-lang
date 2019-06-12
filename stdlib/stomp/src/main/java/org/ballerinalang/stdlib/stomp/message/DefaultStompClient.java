@@ -18,6 +18,7 @@
 
 package org.ballerinalang.stdlib.stomp.message;
 
+import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class DefaultStompClient extends StompListener {
     private static final Logger log = LoggerFactory.getLogger(DefaultStompClient.class);
     private CallableUnitCallback callableUnit;
     private CountDownLatch connectDownLatch;
+    private Context context;
 
     public DefaultStompClient(URI uri) {
         super(uri);
@@ -57,8 +59,9 @@ public class DefaultStompClient extends StompListener {
     }
 
     @Override
-    public void onMessage(String messageId, String body, String destination) {
-        StompDispatcher.executeOnMessage(messageId, body, destination);
+    public void onMessage(String messageId, String body, String destination, String replyToDestination) {
+        StompDispatcher.execute(this.context);
+        StompDispatcher.executeOnMessage(messageId, body, destination, replyToDestination);
     }
 
     @Override
@@ -69,5 +72,9 @@ public class DefaultStompClient extends StompListener {
     @Override
     public void onCriticalError(Exception e) {
         // It's not implemented in Ballerina yet.
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 }

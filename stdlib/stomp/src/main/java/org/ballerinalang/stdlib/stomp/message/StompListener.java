@@ -1,5 +1,6 @@
 package org.ballerinalang.stdlib.stomp.message;
 
+import org.ballerinalang.util.exceptions.BallerinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public abstract class StompListener {
 
     public abstract void onConnected(String sessionId);
 
-    public abstract void onMessage(String messageId, String body, String destination);
+    public abstract void onMessage(String messageId, String body, String destination, String replyToDestination);
 
     public abstract void onError(String message, String description);
 
@@ -80,7 +81,7 @@ public abstract class StompListener {
                 wait();
             }
 
-        } catch (StompException ex) {
+        } catch (BallerinaException ex) {
             ex.initCause(ex);
         } catch (Exception e) {
             try {
@@ -90,15 +91,6 @@ public abstract class StompListener {
             }
         }
     }
-
-//    public void retryConnect() {
-//        int retryCount;
-//        int countLimit = 3;
-//
-//        for (retryCount = 0; retryCount < countLimit; retryCount++) {
-//            this.connect();
-//        }
-//    }
 
     private void reader() {
         try {
@@ -138,7 +130,8 @@ public abstract class StompListener {
                         case MESSAGE:
                             String messageId = frame.header.get("message-id");
                             String messageDestination = frame.header.get("destination");
-                            onMessage(messageId, frame.body, messageDestination);
+                            String replyToDestination = frame.header.get("reply-to");
+                            onMessage(messageId, frame.body, messageDestination, replyToDestination);
                             break;
                         case ERROR:
                             String message = frame.header.get("message");
