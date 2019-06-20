@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import static org.ballerinalang.test.stomp.StompTestUtils.testSend;
 
 /**
- * Includes tests for a simple consumer and producer.
+ * Includes tests for a multiple consumer and producer.
  */
 @Test(groups = {"stomp-test"})
 public class MultipleConsumerTest extends StompTestCommons {

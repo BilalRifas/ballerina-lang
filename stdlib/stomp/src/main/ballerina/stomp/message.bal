@@ -16,7 +16,8 @@
 
 public type Message object {
     private string content = "";
-    private string replyToDestination = "";
+    private string destination = "";
+    private string id = "";
 
     # Get message content.
     #
@@ -25,11 +26,16 @@ public type Message object {
         return self.content;
     }
 
-    public function getReplytToDestination() returns string {
-        return self.replyToDestination;
+    public function getReplyToDestination() returns string {
+        return self.destination;
+    }
+
+    public function getMessageId() returns string {
+        return self.id;
     }
 
     public function ack() returns error? = external;
+
 };
 
 

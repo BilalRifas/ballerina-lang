@@ -20,8 +20,8 @@ import ballerina/io;
 listener stomp:Listener simpleConsumerEndpoint = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });

@@ -19,15 +19,74 @@ import ballerina/stomp;
 stomp:Sender stompSender = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
 
-public function testDurableTopicSend() {
-        string message = "Hello World with durable topic subscription";
+// TODO add an ID for durable subscribe
+//public function testFirstDurableTopicSend() {
+//        string message = "Hello World with durable topic subscription 1 ";
+//        string destination = "/topic/my-durable";
+//        map<string> customHeaderMap = {};
+//        var publish = stompSender->send(message,destination,customHeaderMap);
+//        var disconnect = stompSender->disconnect();
+//}
+
+public function main(){
+        string message = "Hello World with durable topic subscription 1 ";
         string destination = "/topic/my-durable";
-        var publish = stompSender->send(message,destination);
+        map<string> customHeaderMap = {};
+        customHeaderMap["persistent"] = "persistent:true";
+        var publish = stompSender->send(message,destination,customHeaderMap);
         var disconnect = stompSender->disconnect();
+
 }
+//listener stomp:Listener consumerEndpointDurable = new({
+//        host: "localhost",
+//        port: 61613,
+//        username: "guest",
+//        password: "guest",
+//        vhost: "/",
+//        acceptVersion: "1.1"
+//    });
+//
+//@stomp:ServiceConfig{
+//        destination:"/topic/my-durable",
+//        ackMode: stomp:AUTO,
+//        durable: true
+//}
+//
+//service stompListenerDurable on consumerEndpointDurable  {
+//    resource function onMessage(stomp:Message message) {
+//        var content = message.getContent();
+//        msgVal = untaint content;
+//
+//        io:println("received: " + content);
+//    }
+//
+//    resource function onError(error er) {
+//        log:printError("An error occured", err = er);
+//    }
+//}
+//
+//public function main() {
+//    string message = "Hello World with durable topic subscription";
+//    string destination = "/topic/my-durable";
+//    var publish = stompSender->send(message,destination);
+//
+//    string msg = getMsgVal();
+//    var disconnect = consumerEndpointDurable.stop();
+//    map<string> customHeaderMap = {};
+//    var publish = stompSender->send(message,destination,customHeaderMap);
+//    var startListener = consumerEndpointDurable.start();
+//    string msg = getMsgVal();
+//
+//}
+//
+//function getMsgVal() returns string {
+//    return msgVal;
+//}
+
+

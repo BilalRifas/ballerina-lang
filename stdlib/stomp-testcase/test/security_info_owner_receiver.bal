@@ -6,8 +6,8 @@ import ballerina/log;
 listener stomp:Listener consumerEndpoint = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -23,9 +23,10 @@ service stompMotionDetector on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
+        var messageId = message.getMessageId();
         var content = message.getContent();
+        log:printInfo("Message: " + content + "\n" + "Message Id: " + messageId + "\n");
         log:printInfo("Motion detector");
-        log:printInfo(content);
     }
 
     // // This resource is invoked when the connection is interrupted.

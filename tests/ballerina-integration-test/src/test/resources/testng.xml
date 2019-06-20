@@ -24,7 +24,7 @@
     </listeners>
 
     <!-- Below tests should run sequentially since it will use same port in each test -->
-    <test name="ballerina-http-tests" parallel="false">
+  <test name="ballerina-http-tests" parallel="false">
         <groups>
             <run>
                 <exclude name="broken"/>
@@ -269,18 +269,18 @@
             <class name="org.ballerinalang.test.socket.SocketBaseTest"/>
             <class name="org.ballerinalang.test.socket.SocketClientCallbackServiceTestCase"/>
         </classes>
-    </test>
+    </test>-->
 
-    <test name="ballerina-stomp-tests" parallel="false">
-        <classes>
-            <class name="org.ballerinalang.test.stomp.StompTestCommons"/>
-            <class name="org.ballerinalang.test.stomp.SimpleConsumerTest"/>
-            <class name="org.ballerinalang.test.stomp.MultipleConsumerTest"/>
-            <class name="org.ballerinalang.test.stomp.ClientAckTest"/>
-            <class name="org.ballerinalang.test.stomp.ClientIndividualAckTest"/>
-            <class name="org.ballerinalang.test.stomp.DurableTopicConsumerTest"/>
-        </classes>
-    </test>
+<!--    <test name="ballerina-stomp-tests" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.ballerinalang.test.stomp.StompTestCommons"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.SimpleConsumerTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.MultipleConsumerTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.ClientAckTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.ClientIndividualAckTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.DurableTopicConsumerTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
     <test name="artemis-test" parallel="false">
         <classes>
             <class name="org.ballerinalang.test.messaging.artemis.ArtemisTestCommons"/>

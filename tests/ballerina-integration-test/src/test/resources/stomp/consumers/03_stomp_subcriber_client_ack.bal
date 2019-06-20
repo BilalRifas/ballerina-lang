@@ -23,8 +23,8 @@ int limitCount = 1;
 listener stomp:Listener consumerEndpointClientAck = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -33,7 +33,7 @@ listener stomp:Listener consumerEndpointClientAck = new({
         destination:"/queue/sports",
         ackMode: stomp:CLIENT
 }
-
+// TODO try to find out for client acknowledgement retry for batch message subscribe
 service stompListenerClientAck on consumerEndpointClientAck  {
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();

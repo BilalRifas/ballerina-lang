@@ -32,8 +32,8 @@ public class StompConstants {
     // Stomp configs fields
     public static final String CONFIG_FIELD_HOST = "host";
     public static final String CONFIG_FIELD_PORT = "port";
-    public static final String CONFIG_FIELD_LOGIN = "login";
-    public static final String CONFIG_FIELD_PASSCODE = "passcode";
+    public static final String CONFIG_FIELD_LOGIN = "username";
+    public static final String CONFIG_FIELD_PASSCODE = "password";
     public static final String CONFIG_FIELD_ACKMODE = "ackMode";
     public static final String CONFIG_FIELD_DURABLE = "durable";
     public static final String CONFIG_FIELD_DESTINATION = "destination";
@@ -42,10 +42,9 @@ public class StompConstants {
 
     public static final String STOMP_MESSAGE = "stomp-message";
     public static final String MSG_CONTENT_NAME = "content";
-    public static final String MSG_DESTINATION = "destination";
-    public static final String REPLY_TO_MSG_DESTINATION = "replyTo-destination";
+    public static final String REPLY_TO_DESTINATION = "destination";
     public static final String STOMP_MSG = "STOMPMSG";
-    public static final String MSG_ID = "message-id";
+    public static final String MSG_ID = "id";
     public static final String MESSAGE_OBJ = "Message";
     public static final String ACK_MODE = "ack-mode";
     public static final String ACK_AUTO = "auto";

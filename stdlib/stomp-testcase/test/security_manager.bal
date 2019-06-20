@@ -1,5 +1,4 @@
 import ballerina/io;
-import ballerina/time;
 import ballerina/stomp;
 import ballerina/log;
 import ballerina/http;
@@ -41,8 +40,8 @@ map<http:WebSocketCaller> connectionsMap = {};
 stomp:Sender sensorManager = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -51,8 +50,8 @@ stomp:Sender sensorManager = new({
 listener stomp:Listener consumerEndpoint = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -132,7 +131,7 @@ service userStoreService on httpListener {
                             "', OrderedPhone: '" + newOrder.ownerName + "';");
 
                     // Send the message to the STOMP queue.
-                    var stompQueueMessage = sensorManager->dualChannelSend(ownerOrderDetails.toString(),"/queue/orderQueue");
+                    var stompQueueMessage = sensorManager->dualChannelSend(ownerOrderDetails.toString(),"/queue/orderQueue","");
 
                     // Construct a success message for the response.
                     responseMessage = { "Message":
@@ -140,8 +139,7 @@ service userStoreService on httpListener {
             } else {
                 responseMessage = { "Message": "Invalid order delivery details" };
             }
-        }
-        else {
+        } else {
             // If owner is not available, construct a proper response message to notify user.
             responseMessage = { "Message": "Requested address not available" };
         }
@@ -150,7 +148,7 @@ service userStoreService on httpListener {
         response.setJsonPayload(responseMessage);
         checkpanic caller->respond(response);
 
-
+        //runtime:sleep(3000);
     }
     // Resource that allows users to get a list of all the available owner.
     @http:ResourceConfig { methods: ["GET"], produces: ["application/json"] }
@@ -173,9 +171,10 @@ service managerMotionDetector on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
+        var messageId = message.getMessageId();
         var content = message.getContent();
+        log:printInfo("Message: " + content + "\n" + "Message Id: " + messageId + "\n");
         log:printInfo("Motion detector");
-        log:printInfo(content);
         var motionDetector = sensorManager->send("Motion Sensor has detected", motionDestination);
         var alertPolice = sensorManager->send("Motion Sensor has detected danger. Suspicious activity detected", policeStationDestination);
     }
@@ -229,7 +228,7 @@ service stompHttpRequestService on consumerEndpoint  {
         string payload = content;
 
         // --- http related stuffs --- //
-        log:printInfo("New order successfilly received from the Order Queue");
+        log:printInfo("New order successfully received from the Order Queue");
 
         log:printInfo("Order Details: " + payload);
 

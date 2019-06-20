@@ -6,8 +6,8 @@ import ballerina/time;
 stomp:Sender sensors = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -32,15 +32,15 @@ public function main() {
         io:println("Motion Detected: " + motionDetector);
         var motionAlert = sensors->send("motion",motionDestination);
 
-        while (smokeCount < 3) {if (publicService == null || branch == null || contact == null || ownerName == null) {
-                    response.statusCode = 400;
-                    response.setJsonPayload({ "Message": "Bad Request - Invalid payload" });
-                    checkpanic caller->respond(response);
-                    return;
-        }
-            smokeCount= smokeCount + 1;
-            io:println(smokeCount);
-        }
+        //while (smokeCount < 3) {if (publicService == null || branch == null || contact == null || ownerName == null) {
+        //            response.statusCode = 400;
+        //            response.setJsonPayload({ "Message": "Bad Request - Invalid payload" });
+        //            checkpanic caller->respond(response);
+        //            return;
+        //}
+        //    smokeCount= smokeCount + 1;
+        //    io:println(smokeCount);
+        //}
         io:println(smokeCount);
         smokeDetector = true;
         io:println("Smoke Detected: " + smokeDetector);

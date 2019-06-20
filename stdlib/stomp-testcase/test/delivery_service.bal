@@ -17,8 +17,8 @@ json[] userDetail = ["Name:John", "Phone:0771234567", "Address:No105", "City:Col
 stomp:Sender sensors = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -27,8 +27,8 @@ stomp:Sender sensors = new({
 listener stomp:Listener consumerEndpoint = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -44,9 +44,10 @@ service stompDualChannelService on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
+        var messageId = message.getMessageId();
         var content = message.getContent();
+        log:printInfo("Message: " + content + "\n" + "Message Id: " + messageId + "\n");
         log:printInfo("Stomp Dual Channel Service");
-        log:printInfo(content);
     }
 }
 
@@ -121,7 +122,7 @@ service ownerDetailDeliveryService on deliveryEP {
             // Send a STOMP message.
             if (ownerDeliverDetails is json) {
 
-                    log:printInfo("Order delivery details added to the delivery queue'; CustomerName: '" + newDeliver.
+                    log:printInfo("Order delivery details added to the delivery queue'; Public Service Name: '" + newDeliver.
                             publicService +
                             "', OwnerDetailName: '" + newDeliver.ownerName + "';");
                     // Send the message to the STOMP broker.

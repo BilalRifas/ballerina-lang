@@ -65,7 +65,9 @@ public class Start implements NativeCallableUnit {
             BMap<String, BValue> start = (BMap<String, BValue>) context.getRefArgument(0);
             start.addNativeData(StompConstants.COUNTDOWN_LATCH, countDownLatch);
             String ackMode = (String) start.getNativeData(StompConstants.CONFIG_FIELD_ACKMODE);
+            System.out.println("Ack mode : " + ackMode);
             boolean durableFlag = (boolean) start.getNativeData(StompConstants.CONFIG_FIELD_DURABLE);
+            System.out.println("durable flag" + durableFlag);
 
             // Get stompClient object created in intListener.
             DefaultStompClient client = (DefaultStompClient)

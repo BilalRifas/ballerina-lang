@@ -20,15 +20,15 @@ import ballerina/log;
 listener stomp:Listener consumerEndpointClientIndividualAck = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
 
 @stomp:ServiceConfig{
         destination:"/queue/sports",
-        ackMode: stomp:CLIENTINDIVIDUAL
+        ackMode: stomp:CLIENT_INDIVIDUAL
 }
 
 service stompListenerClientIndividualAck on consumerEndpointClientIndividualAck  {

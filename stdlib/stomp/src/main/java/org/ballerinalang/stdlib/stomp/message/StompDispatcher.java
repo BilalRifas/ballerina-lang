@@ -78,7 +78,6 @@ public class StompDispatcher {
     public static void executeOnMessage(String messageId, String body, String destination, String replyToDestination) {
         Service service = serviceRegistry.get(destination);
         extractResource(service);
-
         onMessageResource = resourceRegistry.get("onMessage");
 
         Annotation serviceAnnotation = getServiceConfigAnnotation(service);
@@ -95,12 +94,13 @@ public class StompDispatcher {
 
                 if (callerType.equals("string")) {
                     Executor.submit(onMessageResource, new ResponseCallback(),
-                            new HashMap<>(), null, new BString(body), new BString(replyToDestination));
+                            new HashMap<>(), null, new BString(body));
                 } else if (callerType.equals("ballerina/stomp:Message")) {
                     msgObj.addNativeData(StompConstants.STOMP_MSG, body);
+                    msgObj.addNativeData(StompConstants.MSG_ID, new BString(messageId));
+                    msgObj.addNativeData(StompConstants.REPLY_TO_DESTINATION, replyToDestination);
                     msgObj.put(StompConstants.MSG_CONTENT_NAME, new BString(body));
-                    msgObj.put(StompConstants.MSG_DESTINATION, new BString(destination));
-                    msgObj.put(StompConstants.REPLY_TO_MSG_DESTINATION, new BString(replyToDestination));
+                    msgObj.put(StompConstants.REPLY_TO_DESTINATION, new BString(replyToDestination));
                     msgObj.put(StompConstants.MSG_ID, new BString(messageId));
                     msgObj.put(StompConstants.ACK_MODE, new BString(ackMode));
                     msgObj.addNativeData(StompConstants.ACK_MODE, ackMode);

@@ -8,8 +8,8 @@ package org.ballerinalang.stdlib.stomp.message;
 
 enum StompCommand {
 // Client-commands
-CONNECT, SUBSCRIBE, ACK,
+CONNECT, SUBSCRIBE, ACK, DISCONNECT,
 
 // Server-commands
-CONNECTED, MESSAGE, ERROR
+CONNECTED, MESSAGE, ERROR, DISCONNECTED
 }

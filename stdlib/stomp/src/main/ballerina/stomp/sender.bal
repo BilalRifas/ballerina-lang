@@ -43,20 +43,20 @@ public type Sender client object {
 
     public remote function connect(ConnectionConfiguration stompConfig) returns error?;
 
-    public remote function send(string message, string destination) returns error?;
-
-    public remote function dualChannelSend(string message, string destination) returns error?;
+    public remote function send(string message, string destination, map<string> customHeaderMap) returns error?;
 
     public remote function disconnect() returns error?;
 
     public remote function readReceipt() returns error?;
+
+    public remote function readCustomHeader(map<string> customHeaderMap) returns string;
 };
 
 public type ConnectionConfiguration record {
     string host = "";
     int port = 0;
-    string login  = "";
-    string passcode = "";
+    string username  = "";
+    string password = "";
     string vhost = "";
     string acceptVersion = "";
 };
@@ -68,8 +68,8 @@ public remote function Sender.connect(ConnectionConfiguration stompConfig) retur
     // CONNECT frame to get connected.
     string connect = "CONNECT" + "\n" +
         "accept-version:" + stompConfig.acceptVersion + "\n" +
-        "login:" + stompConfig.login + "\n" +
-        "passcode:" + stompConfig.passcode + "\n" +
+        "login:" + stompConfig.username + "\n" +
+        "passcode:" + stompConfig.password + "\n" +
         "host:" + stompConfig.vhost + "\n" +
         "\n" + self.endOfFrame;
 
@@ -79,20 +79,22 @@ public remote function Sender.connect(ConnectionConfiguration stompConfig) retur
     if (writeResult is error) {
         io:println("Unable to write the connect frame", writeResult);
     }
-    io:println("Successfully connected to stomp broker");
+    log:printInfo("Successfully connected to stomp broker");
 
     var readReceipt = self->readReceipt();
     return;
 }
 
-public remote function Sender.send(string message, string destination) returns error?{
+public remote function Sender.send(string message, string destination, map<string> customHeaderMap) returns error?{
     socket:Client socketClient = self.socketClient;
 
     // Generating unique id for message receipt.
     string messageId = system:uuid();
 
+    string customHeaders = self->readCustomHeader(customHeaderMap);
+
     // SEND frame to send message.
-    string send = "SEND" + "\n" + "destination:" + destination + "\n" + "receipt:" + messageId + "\n" + "redelivered:" + "false" + "\n" + "content-type:"+"text/plain" + "\n" + "\n" + message + "\n" + self.endOfFrame;
+    string send = "SEND" + "\n" + "destination:" + destination + "\n" + "receipt:" + messageId + "\n" + customHeaders + "\n" + "redelivered:" + "false" + "\n" + "content-type:"+"text/plain" + "\n" + "\n" + message + "\n" + self.endOfFrame;
 
     byte[] payloadByte = send.toByteArray("UTF-8");
     // Send desired content to the server using the write function.
@@ -103,35 +105,6 @@ public remote function Sender.send(string message, string destination) returns e
 
     var readReceipt = self->readReceipt();
     return;
-}
-
-public remote function Sender.dualChannelSend(string message, string destination) returns error?{
-    socket:Client socketClient = self.socketClient;
-
-    // Generating unique id for message receipt.
-    string messageId = system:uuid();
-
-        // SEND frame to send message.
-        string send = "SEND" + "\n" +
-         "destination:" + destination + "\n" +
-         "receipt:" + messageId + "\n" +
-         "redelivered:" + "false" + "\n" +
-         "persistent:" + "false" +
-         "correlation-id" + "stompCorrelationID" +
-         "reply-to:" + destination + "\n" +
-         "content-type:"+"text/plain" + "\n" + "\n" +
-         message + "\n" +
-         self.endOfFrame;
-
-        byte[] payloadByte = send.toByteArray("UTF-8");
-        // Send desired content to the server using the write function.
-        var writeResult = socketClient->write(payloadByte);
-        if (writeResult is error) {
-            io:println("Unable to write the send frame", writeResult);
-        }
-
-        var readReceipt = self->readReceipt();
-        return;
 }
 
 public remote function Sender.disconnect() returns error?{
@@ -158,6 +131,32 @@ public remote function Sender.disconnect() returns error?{
         io:println("Client connection closed successfully.");
     }
     return;
+}
+
+public remote function Sender.readCustomHeader(map<string> customHeaderMap) returns string{
+        string headerValue = "";
+        int headerCount = customHeaderMap.length();
+        string[] cHeader = [] ;
+        if (headerCount > 0) {
+            string[] mapKeys = customHeaderMap.keys();
+            int arrayKeyLength = mapKeys.length();
+            int arrayCount = 0;
+                foreach var header in mapKeys {
+                    headerValue = <string>customHeaderMap[header];
+                    headerValue = headerValue + "\n";
+                    cHeader[arrayCount] = headerValue;
+                    arrayCount = arrayCount + 1;
+                }
+        }
+
+        int arrayLength = cHeader.length();
+        int arrayCount = 0;
+        string element = "";
+        while (arrayCount < arrayLength){
+            element = element + cHeader[arrayCount];
+            arrayCount = arrayCount +1;
+        }
+        return element;
 }
 
 public remote function Sender.readReceipt() returns error?{

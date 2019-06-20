@@ -19,8 +19,8 @@ import ballerina/stomp;
 stomp:Sender stompSender = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });

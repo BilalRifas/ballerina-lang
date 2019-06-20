@@ -24,7 +24,6 @@ public abstract class StompListener {
     private volatile boolean running = true;
     private Socket socketConnection;
     private String sessionId;
-    private String clientUuid;
 
     public StompListener(URI uri) {
         this.connectionUri = uri;
@@ -61,7 +60,6 @@ public abstract class StompListener {
             // Start reader thread.
             readerThread.start();
 
-            String uuid = UUID.randomUUID().toString().replace("-", "");
             // Sending CONNECT command.
             StompFrame connectionFrame = new StompFrame(StompCommand.CONNECT);
             if (connectionUri.getUserInfo() != null) {
@@ -69,11 +67,10 @@ public abstract class StompListener {
                 if (credentials.length == 2) {
                     connectionFrame.header.put("login", credentials[0]);
                     connectionFrame.header.put("passcode", credentials[1]);
-                    connectionFrame.header.put("client-id", uuid);
-                    this.clientUuid = uuid;
                 }
+                connectionFrame.header.put("client-id", "test");
             }
-
+            System.out.println("Connect frame: " + connectionFrame);
             sendFrame(connectionFrame);
 
             // Wait for CONNECTED broker command.
@@ -162,13 +159,14 @@ public abstract class StompListener {
     public void durableSubscribe(String destination, String ack) {
         StompFrame frame = new StompFrame(StompCommand.SUBSCRIBE);
         frame.header.put("destination", destination);
-        frame.header.put("session", sessionId);
-        frame.header.put("ack", ack);
         String uuid = UUID.randomUUID().toString().replace("-", "");
         frame.header.put("id", uuid);
         frame.header.put("durable", "true");
         frame.header.put("auto-delete", "false");
-        frame.header.put("client-id", this.clientUuid);
+        frame.header.put("session", sessionId);
+        frame.header.put("ack", ack);
+        frame.header.put("activemq.subscriptionName", "test");
+        frame.header.put("persistent", "true");
         sendFrame(frame);
     }
 
@@ -176,6 +174,28 @@ public abstract class StompListener {
         StompFrame frame = new StompFrame(StompCommand.ACK);
         frame.header.put("message-id", messageId);
         sendFrame(frame);
+    }
+
+    /**
+     * disconnect() - finalize work with STOMP server
+     */
+    public void disconnect() {
+        if (socketConnection.isConnected()) {
+            try {
+                // sending DISCONNECT command
+                StompFrame frame = new StompFrame(StompCommand.DISCONNECTED);
+                frame.header.put("session", sessionId);
+                sendFrame(frame);
+
+                // stopping reader thread
+                running = false;
+
+                // close socket
+                socketConnection.close();
+            } catch (Exception e) {
+                e.initCause(e);
+            }
+        }
     }
 
     private synchronized void sendFrame(StompFrame frame) {

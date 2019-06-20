@@ -24,6 +24,7 @@ import org.ballerinalang.test.context.BServerInstance;
 import org.ballerinalang.test.context.BallerinaTestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterGroups;
 import org.testng.annotations.BeforeGroups;
 
@@ -51,7 +52,7 @@ public class StompTestCommons extends BaseTest {
         try {
             embeddedBroker.start();
         } catch (Exception ex) {
-            log.error("Cannot start ActiveMQ Stomp broker " + ex.getMessage(), ex);
+            Assert.fail("Cannot start ActiveMQ Stomp broker", ex);
         }
 
         // Start Ballerina server
@@ -59,7 +60,7 @@ public class StompTestCommons extends BaseTest {
         serverInstance.startServer(path.toAbsolutePath().toString(), "consumers", new String[]{"--experimental"},
                                    new int[]{});
     }
-
+    // TODO find-out to stop the broker
     @AfterGroups(value = "stomp-test", alwaysRun = true)
     public void stop() throws Exception {
         serverInstance.removeAllLeechers();

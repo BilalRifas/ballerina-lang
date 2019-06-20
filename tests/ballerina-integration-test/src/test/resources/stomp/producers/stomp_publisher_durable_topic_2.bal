@@ -25,12 +25,21 @@ stomp:Sender stompSender = new({
         acceptVersion: "1.1"
     });
 
-public function testMultipleSend() {
-        string message1 = "Hello World From Ballerina - Sports";
-        string message2 = "Hello World From Ballerina - News";
-        string destination1 = "/queue/sports";
-        string destination2 = "/queue/news";
-        var publish1 = stompSender->send(message1,destination1);
-        var publish2 = stompSender->send(message2,destination2);
-        var disconnect = stompSender->disconnect();
+// TODO add an ID for durable subscribe
+//public function testSecondDurableTopicSend() {
+//        string message = "Hello World with durable topic subscription 2 ";
+//        string destination = "/topic/my-durable";
+//        map<string> customHeaderMap = {};
+//        var publish = stompSender->send(message,destination,customHeaderMap);
+//        var disconnect = stompSender->disconnect();
+//}
+
+public function main(){
+
+            string message = "Hello World with durable topic subscription 2 ";
+            string destination = "/topic/my-durable";
+            map<string> customHeaderMap = {};
+            var publish = stompSender->send(message,destination,customHeaderMap);
+            var disconnect = stompSender->disconnect();
+
 }

@@ -31,11 +31,12 @@ import java.nio.file.Paths;
 import static org.ballerinalang.test.stomp.StompTestUtils.testSend;
 
 /**
- * Includes tests for a simple consumer and producer.
+ * Includes tests for a durable consumer and producer.
  */
 @Test(groups = {"stomp-test"})
 public class DurableTopicConsumerTest extends StompTestCommons {
     private CompileResult result;
+    private CompileResult result2;
 
     @BeforeClass
     public void setup() throws URISyntaxException {
@@ -43,12 +44,27 @@ public class DurableTopicConsumerTest extends StompTestCommons {
         Path sourcePath = Paths.get("src", "test", "resources", "stomp", "producers");
         result = BCompileUtil.compile(sourcePath.resolve("stomp_publisher_durable_topic.bal")
                 .toAbsolutePath().toString());
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        result2 = BCompileUtil.compile(sourcePath.resolve("stomp_publisher_durable_topic_2.bal")
+                .toAbsolutePath().toString());
     }
 
+    // TODO fix test-cases with proper flow
     @Test(description = "Tests the sending of a string message to a queue")
     public void testDurableTopicSend() {
         String log = "received: Hello World with durable topic subscription";
-        String functionName = "testDurableTopicSend";
+        String functionName = "testFirstDurableTopicSend";
         testSend(result, log, functionName, serverInstance);
+    }
+
+    @Test(description = "Tests the sending of a string message to a queue")
+    public void testDurableTopicSend2() {
+        String log = "received: Hello World with durable topic subscription";
+        String functionName = "testSecondDurableTopicSend";
+        testSend(result2, log, functionName, serverInstance);
     }
 }

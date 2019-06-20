@@ -9,8 +9,8 @@ int limitCount = 1;
 listener stomp:Listener consumerEndpoint = new({
         host: "localhost",
         port: 61613,
-        login: "guest",
-        passcode: "guest",
+        username: "guest",
+        password: "guest",
         vhost: "/",
         acceptVersion: "1.1"
     });
@@ -21,14 +21,14 @@ listener stomp:Listener consumerEndpoint = new({
         ackMode: stomp:CLIENT
 }
 
-// TODO : Check with other language clients.
 // This binds the created consumer to the listener service.
 service stompListenerSports on consumerEndpoint  {
     // This resource is invoked when a message is received.
     // Message object only gives us the string message.
     resource function onMessage(stomp:Message message) {
+        var messageId = message.getMessageId();
         var content = message.getContent();
-        log:printInfo(content);
+        log:printInfo("Message: " + content + "\n" + "Message Id: " + messageId + "\n");
         if (limitCount < 5) {
             limitCount= limitCount + 1;
         } else {

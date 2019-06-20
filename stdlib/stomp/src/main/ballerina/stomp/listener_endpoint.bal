@@ -61,16 +61,15 @@ public annotation<service> ServiceConfig StompServiceConfig;
 #
 # + host - host to connect the tcp socket.
 # + port - port to connect the tcp socket.
-# + login - the login username for broker.
-# + passcode - the password for broker.
+# + username - the login username for broker.
+# + password - the password for broker.
 # + vhost - virtual host.
 # + acceptVersion - accept version supported by broker & listener.
 public type ListenerConfig record {
     string host = "";
     int port = 0;
-    string login  = "";
-    string passcode = "";
+    string username  = "";
+    string password = "";
     string vhost = "";
     string acceptVersion = "";
 };
-
