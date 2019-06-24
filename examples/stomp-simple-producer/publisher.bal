@@ -16,7 +16,6 @@ public function main() {
         string message = "Hello World From Ballerina";
         string destination = "/queue/sports";
         map<string> customHeaderMap = {};
-        customHeaderMap["persistent"] = "persistent:true";
         var publish = stompSender->send(message,destination,customHeaderMap);
         var disconnect = stompSender->disconnect();
 }

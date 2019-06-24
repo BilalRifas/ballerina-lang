@@ -16,6 +16,7 @@
 
 import ballerina/stomp;
 import ballerina/log;
+import ballerina/io;
 
 listener stomp:Listener consumerEndpointClientIndividualAck = new({
         host: "localhost",
@@ -28,7 +29,8 @@ listener stomp:Listener consumerEndpointClientIndividualAck = new({
 
 @stomp:ServiceConfig{
         destination:"/queue/sports",
-        ackMode: stomp:CLIENT_INDIVIDUAL
+        ackMode: stomp:CLIENT_INDIVIDUAL,
+        durableId: "e12345"
 }
 
 service stompListenerClientIndividualAck on consumerEndpointClientIndividualAck  {

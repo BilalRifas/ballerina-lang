@@ -5,7 +5,8 @@ import ballerina/io;
 import ballerina/stomp;
 import ballerina/runtime;
 
-map<string> contentMap = {};
+//map<string> contentMap = {};
+string msgVal = "";
 
 listener stomp:Listener consumerEndpoint = new({
         host: "localhost",
@@ -19,7 +20,8 @@ listener stomp:Listener consumerEndpoint = new({
 // Add service config.
 @stomp:ServiceConfig{
     destination:"/queue/SMSReceiveNotificationStore",
-    ackMode: stomp:AUTO
+    ackMode: stomp:AUTO,
+    durableId: "e12345"
 }
 
 // This binds the created consumer to the listener service.
@@ -29,10 +31,11 @@ service stompHttpRequestService on consumerEndpoint  {
     resource function onMessage(stomp:Message message) {
         var messageId = message.getMessageId();
         var content = message.getContent();
+        msgVal = untaint content;
         log:printInfo("Message: " + content + "\n" + "Message Id: " + messageId + "\n");
         log:printInfo("HTTP request service receiver");
         //globalContent = untaint content;
-        forwardContent(content, messageId);
+        //forwardContent(content, messageId);
     }
 
     // This resource is invoked when the connection is interrupted.
@@ -85,23 +88,27 @@ service SMSSenderProxy on sendListener {
     }
 }
 
-function forwardContent(string content, string messageId){
-    contentMap[messageId] = content;
-    io:println("Forward: Content Map :");
-    io:println(contentMap);
-    io:println("Content: " + content);
-    io:println("MessageId: " + messageId);
+function getContent() returns string{
+    return msgVal;
 }
 
-function getContent() returns string{
-    string[] mapKeys = contentMap.keys();
-    int arrayLength = mapKeys.length();
-    int count = 0;
-    string currentContent = "";
-        while(arrayLength > count){
-            currentContent = mapKeys[count];
-            count = count +1;
-        }
-    log:printInfo("Current Content :" + currentContent);
-    return currentContent;
-}
+//function forwardContent(string content, string messageId){
+//    contentMap[messageId] = content;
+//    io:println("Forward: Content Map :");
+//    io:println(contentMap);
+//    io:println("Content: " + content);
+//    io:println("MessageId: " + messageId);
+//}
+
+//function getContent() returns string{
+//    string[] mapKeys = contentMap.keys();
+//    int arrayLength = mapKeys.length();
+//    int count = 0;
+//    string currentContent = "";
+//        while(arrayLength > count){
+//            currentContent = mapKeys[count];
+//            count = count +1;
+//        }
+//    log:printInfo("Current Content :" + currentContent);
+//    return currentContent;
+//}

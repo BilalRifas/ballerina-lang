@@ -28,6 +28,7 @@ stomp:Sender stompSender = new({
 public function testClientIndividualAckSend() {
         string message = "Hello World with client-individual ack";
         string destination = "/queue/sports";
-        var publish = stompSender->send(message,destination);
+        map<string> customHeaderMap = {};
+        var publish = stompSender->send(message,destination,customHeaderMap);
         var disconnect = stompSender->disconnect();
 }

@@ -28,10 +28,11 @@ stomp:Sender stompSender = new({
 public function testClientAckSend() {
         string message = "Hello World with Client Ack";
         string destination = "/queue/sports";
-        var publish1 = stompSender->send(message,destination);
-        var publish2 = stompSender->send(message,destination);
-        var publish3 = stompSender->send(message,destination);
-        var publish4 = stompSender->send(message,destination);
-        var publish5 = stompSender->send(message,destination);
+        map<string> customHeaderMap = {};
+        var publish1 = stompSender->send(message,destination,customHeaderMap);
+        var publish2 = stompSender->send(message,destination,customHeaderMap);
+        var publish3 = stompSender->send(message,destination,customHeaderMap);
+        var publish4 = stompSender->send(message,destination,customHeaderMap);
+        var publish5 = stompSender->send(message,destination,customHeaderMap);
         var disconnect = stompSender->disconnect();
 }

@@ -46,7 +46,9 @@ public class SimpleConsumerTest extends StompTestCommons {
 
     @Test(description = "Tests the sending of a string message to a queue")
     public void testSimpleSend() {
-        String log = "received: Hello World";
+        String log = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+ "Hello World";
         String functionName = "testSimpleSend";
         testSend(result, log, functionName, serverInstance);
     }

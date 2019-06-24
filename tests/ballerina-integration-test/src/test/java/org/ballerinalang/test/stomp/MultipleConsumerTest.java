@@ -46,8 +46,12 @@ public class MultipleConsumerTest extends StompTestCommons {
 
     @Test(description = "Tests the sending of multiple message to a queue")
     public void testMultipleSend() {
-        String log1 = "received: Hello World From Ballerina - Sports";
-        String log2 = "received: Hello World From Ballerina - News";
+        String log1 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World From Ballerina - Sports";
+        String log2 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World From Ballerina - News";
         String functionName = "testMultipleSend";
         testSend(result, log1, functionName, serverInstance);
         testSend(result, log2, functionName, serverInstance);

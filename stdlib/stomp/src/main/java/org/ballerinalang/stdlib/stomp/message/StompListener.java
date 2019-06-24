@@ -24,6 +24,8 @@ public abstract class StompListener {
     private volatile boolean running = true;
     private Socket socketConnection;
     private String sessionId;
+    private boolean durableFlag;
+    private String durableConnectId;
 
     public StompListener(URI uri) {
         this.connectionUri = uri;
@@ -36,6 +38,11 @@ public abstract class StompListener {
     public abstract void onError(String message, String description);
 
     public abstract void onCriticalError(Exception e);
+
+    public void durableConnect(String durableId) {
+        this.durableConnectId = durableId;
+        this.durableFlag = true;
+    }
 
     public void connect() {
         try {
@@ -68,9 +75,10 @@ public abstract class StompListener {
                     connectionFrame.header.put("login", credentials[0]);
                     connectionFrame.header.put("passcode", credentials[1]);
                 }
-                connectionFrame.header.put("client-id", "test");
             }
-            System.out.println("Connect frame: " + connectionFrame);
+            if (this.durableFlag) {
+                connectionFrame.header.put("client-id", this.durableConnectId);
+            }
             sendFrame(connectionFrame);
 
             // Wait for CONNECTED broker command.
@@ -84,7 +92,7 @@ public abstract class StompListener {
             try {
                 throw e;
             } catch (IOException | InterruptedException ex) {
-                ex.printStackTrace();
+                ex.initCause(ex);
             }
         }
     }
@@ -156,7 +164,7 @@ public abstract class StompListener {
         sendFrame(frame);
     }
 
-    public void durableSubscribe(String destination, String ack) {
+    public void durableSubscribe(String destination, String ack, String durableId) {
         StompFrame frame = new StompFrame(StompCommand.SUBSCRIBE);
         frame.header.put("destination", destination);
         String uuid = UUID.randomUUID().toString().replace("-", "");
@@ -165,7 +173,7 @@ public abstract class StompListener {
         frame.header.put("auto-delete", "false");
         frame.header.put("session", sessionId);
         frame.header.put("ack", ack);
-        frame.header.put("activemq.subscriptionName", "test");
+        frame.header.put("activemq.subscriptionName", durableId);
         frame.header.put("persistent", "true");
         sendFrame(frame);
     }

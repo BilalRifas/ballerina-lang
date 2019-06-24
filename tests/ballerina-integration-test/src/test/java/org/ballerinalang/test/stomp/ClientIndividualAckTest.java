@@ -47,7 +47,9 @@ public class ClientIndividualAckTest extends StompTestCommons {
 
     @Test(description = "Tests the sending of a string message to a queue")
     public void testClientIndividualAckSend() {
-        String log = "received: Hello World with client-individual ack";
+        String log = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World with client-individual ack";
         String functionName = "testClientIndividualAckSend";
         testSend(result, log, functionName, serverInstance);
     }

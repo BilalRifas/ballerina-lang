@@ -18,7 +18,6 @@ public function main() {
         string destination1 = "/queue/sports";
         string destination2 = "/queue/news";
         map<string> customHeaderMap = {};
-        customHeaderMap["publish-token"] = "token-id:123";
         var publish1 = stompSender->send(message1,destination1,publish-token);
         var publish2 = stompSender->send(message2,destination2,publish-token);
         var disconnect = stompSender->disconnect();

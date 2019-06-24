@@ -16,6 +16,7 @@
 
 import ballerina/stomp;
 import ballerina/io;
+import ballerina/log;
 
 listener stomp:Listener simpleConsumerEndpoint = new({
         host: "localhost",
@@ -28,7 +29,8 @@ listener stomp:Listener simpleConsumerEndpoint = new({
 
 @stomp:ServiceConfig{
         destination:"/queue/sports",
-        ackMode: stomp:AUTO
+        ackMode: stomp:AUTO,
+        durableId: "e12345"
 }
 
 service stompListener on simpleConsumerEndpoint  {
@@ -38,6 +40,6 @@ service stompListener on simpleConsumerEndpoint  {
         }
 
         resource function onError(error er) {
-                log:printError("An error occured", err = er);
+            log:printError("An error occured", err = er);
         }
 }

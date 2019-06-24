@@ -20,9 +20,7 @@ import ballerina/io;
 import ballerina/runtime;
 
 string msgVal = "";
-
-
-listener stomp:Listener consumerEndpointDurable = new({
+stomp:Listener consumerEndpointDurable = new({
         host: "localhost",
         port: 61613,
         username: "guest",
@@ -34,15 +32,15 @@ listener stomp:Listener consumerEndpointDurable = new({
 @stomp:ServiceConfig{
         destination:"/topic/my-durable",
         ackMode: stomp:AUTO,
-        durable: true
+        durable: true,
+        durableId: "d1234"
 }
 
 service stompListenerDurable = @stomp:ServiceConfig {} service {
     resource function onMessage(stomp:Message message) {
         var content = message.getContent();
         msgVal = untaint content;
-        //var disconnect = consumerEndpointDurable.disconnect();
-        io:println("received: " + content);
+        io:println("Message received :" + content);
     }
 
     resource function onError(error er) {
@@ -50,27 +48,40 @@ service stompListenerDurable = @stomp:ServiceConfig {} service {
     }
 };
 
-
-public function main() {
-    //runtime:sleep(5000);
-    var callStart = invokeListener();
-    //runtime:sleep(10000);
-    string msg = getMessage();
-    io:println("Message received :");
-    //var shut = shutDownListener();
-    //var invoke = invokeListener();
+@stomp:ServiceConfig{
+        destination:"/topic/my-durable",
+        ackMode: stomp:AUTO,
+        durable: true,
+        durableId: "e1234"
 }
 
+service stompListenerDurableSecond = @stomp:ServiceConfig {} service {
+    resource function onMessage(stomp:Message message) {
+        var content = message.getContent();
+        msgVal = untaint content;
+        io:println("Message received :" + content);
+    }
 
-function shutDownListener(){
-    var disconnect = consumerEndpointDurable.__stop();
-}
+    resource function onError(error er) {
+        log:printError("An error occured", err = er);
+    }
+};
 
-function invokeListener(){
+public function invokeListener(){
     var callAttach = consumerEndpointDurable.__attach(stompListenerDurable, name = "stompService");
     var callStart = consumerEndpointDurable.__start();
 }
 
-function getMessage() returns string{
+public function invokeListener2(){
+    var callAttach = consumerEndpointDurable.__attach(stompListenerDurableSecond, name = "stompService2");
+    var callStart = consumerEndpointDurable.__start();
+}
+
+public function shutDownListener(){
+    var disconnect = consumerEndpointDurable.__stop();
+}
+
+public function getMessage() returns string{
+    io:println("Message received :"+ msgVal);
     return msgVal;
 }

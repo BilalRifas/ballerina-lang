@@ -41,30 +41,59 @@ public class DurableTopicConsumerTest extends StompTestCommons {
     @BeforeClass
     public void setup() throws URISyntaxException {
         TestUtils.prepareBalo(this);
-        Path sourcePath = Paths.get("src", "test", "resources", "stomp", "producers");
-        result = BCompileUtil.compile(sourcePath.resolve("stomp_publisher_durable_topic.bal")
+        Path sourcePublisherPath = Paths.get("src", "test", "resources", "stomp", "producers");
+        Path sourceSubcriberPath = Paths.get("src", "test", "resources", "stomp", "consumers");
+        result = BCompileUtil.compile(sourceSubcriberPath.resolve("05_stomp_durable_topic_subscriber.bal")
                 .toAbsolutePath().toString());
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        result2 = BCompileUtil.compile(sourcePath.resolve("stomp_publisher_durable_topic_2.bal")
+
+        result2 = BCompileUtil.compile(sourcePublisherPath.resolve("stomp_publisher_durable_topic.bal")
                 .toAbsolutePath().toString());
     }
 
     // TODO fix test-cases with proper flow
-    @Test(description = "Tests the sending of a string message to a queue")
+    @Test(description = "Tests the receiving of durable string message from a topic")
     public void testDurableTopicSend() {
-        String log = "received: Hello World with durable topic subscription";
-        String functionName = "testFirstDurableTopicSend";
-        testSend(result, log, functionName, serverInstance);
-    }
+        String log1 = "";
+        String log2 = "";
+        String log3 = "Message received :redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n" +
+                "Hello World with durable topic subscription";
+        String log4 = "";
+        String log5 = "";
+        String log6 = "";
+        String log7 = "Message received :redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n" +
+                "Hello World with durable topic subscription";
+        String log8 = "";
 
-    @Test(description = "Tests the sending of a string message to a queue")
-    public void testDurableTopicSend2() {
-        String log = "received: Hello World with durable topic subscription";
-        String functionName = "testSecondDurableTopicSend";
-        testSend(result2, log, functionName, serverInstance);
+
+
+        String functionName1 = "invokeListener";
+        testSend(result, log1, functionName1, serverInstance);
+
+        String functionName2 = "publishMessage";
+        testSend(result2, log2, functionName2, serverInstance);
+
+   //awaitly
+        String functionName3 = "getMessage";
+        testSend(result, log3, functionName3, serverInstance);
+
+        String functionName4 = "shutDownListener";
+        testSend(result, log4, functionName4, serverInstance);
+
+        String functionName5 = "publishMessage2";
+        testSend(result2, log5, functionName5, serverInstance);
+
+
+        String functionName6 = "invokeListener2";
+        testSend(result, log6, functionName6, serverInstance);
+
+        String functionName7 = "getMessage";
+        testSend(result, log7, functionName7, serverInstance);
+
+        String functionName8 = "shutDownListener";
+        testSend(result, log8, functionName8, serverInstance);
     }
 }

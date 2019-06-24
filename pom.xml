@@ -1032,9 +1032,9 @@
                 <version>${ballerina.version}</version>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>org.ballerinalang</groupId>-->
-                <!--<artifactId>ballerina-backend-bvm</artifactId>-->
-                <!--<version>${ballerina.version}</version>-->
+            <!--<groupId>org.ballerinalang</groupId>-->
+            <!--<artifactId>ballerina-backend-bvm</artifactId>-->
+            <!--<version>${ballerina.version}</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>org.ballerinalang</groupId>

@@ -35,6 +35,7 @@ public class StompConstants {
     public static final String CONFIG_FIELD_LOGIN = "username";
     public static final String CONFIG_FIELD_PASSCODE = "password";
     public static final String CONFIG_FIELD_ACKMODE = "ackMode";
+    public static final String CONFIG_FIELD_DURABLEID = "durableId";
     public static final String CONFIG_FIELD_DURABLE = "durable";
     public static final String CONFIG_FIELD_DESTINATION = "destination";
 

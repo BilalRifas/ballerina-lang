@@ -28,6 +28,7 @@ stomp:Sender stompSender = new({
 public function testSimpleSend() {
     string message = "Hello World";
     string destination = "/queue/sports";
-    var publish = stompSender->send(message,destination);
+    map<string> customHeaderMap = {};
+    var publish = stompSender->send(message,destination,customHeaderMap);
     var disconnect = stompSender->disconnect();
 }

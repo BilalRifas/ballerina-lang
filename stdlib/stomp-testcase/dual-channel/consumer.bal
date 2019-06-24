@@ -25,7 +25,8 @@ listener stomp:Listener consumerEndpoint = new({
 // Add service config.
 @stomp:ServiceConfig{
     destination:"/queue/SMSStore",
-    ackMode: stomp:AUTO
+    ackMode: stomp:AUTO,
+    durableId: "e12345"
 }
 
 // This binds the created consumer to the listener service.

@@ -61,6 +61,8 @@ public class Register extends BlockingNativeCallableUnit {
         Struct annotationValue = serviceAnnotation.getValue();
         String destination = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DESTINATION);
         String ackMode = annotationValue.getStringField(StompConstants.CONFIG_FIELD_ACKMODE);
+        String durableId = annotationValue.getStringField(StompConstants.CONFIG_FIELD_DURABLEID);
+        connection.addNativeData(StompConstants.CONFIG_FIELD_DURABLEID, durableId);
 
         if (ackMode.equals(StompConstants.ACK_AUTO) || ackMode.equals(StompConstants.ACK_CLIENT) ||
                 ackMode.equals(StompConstants.ACK_CLIENT_INDIVIDUAL)) {

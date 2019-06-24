@@ -15,8 +15,12 @@
 // under the License.
 
 import ballerina/stomp;
+import ballerina/log;
+import ballerina/io;
 
-stomp:Sender stompSender = new({
+int limitCount = 1;
+
+listener stomp:Listener consumerEndpointClientAck = new({
         host: "localhost",
         port: 61613,
         username: "guest",
@@ -25,21 +29,25 @@ stomp:Sender stompSender = new({
         acceptVersion: "1.1"
     });
 
-// TODO add an ID for durable subscribe
-//public function testSecondDurableTopicSend() {
-//        string message = "Hello World with durable topic subscription 2 ";
-//        string destination = "/topic/my-durable";
-//        map<string> customHeaderMap = {};
-//        var publish = stompSender->send(message,destination,customHeaderMap);
-//        var disconnect = stompSender->disconnect();
-//}
+@stomp:ServiceConfig{
+        destination:"/queue/sports",
+        ackMode: stomp:CLIENT,
+        durableId: "e12345"
+}
+// TODO try to find out for client acknowledgement retry for batch message subscribe
+service stompListenerClientAck on consumerEndpointClientAck  {
+    resource function onMessage(stomp:Message message) {
+        var content = message.getContent();
+        io:println("received: " + content);
+        if (limitCount < 5) {
+            limitCount= limitCount + 1;
+        } else {
+            limitCount = 0;
+            var messageAck = message.ack();
+        }
+    }
 
-public function main(){
-
-            string message = "Hello World with durable topic subscription 2 ";
-            string destination = "/topic/my-durable";
-            map<string> customHeaderMap = {};
-            var publish = stompSender->send(message,destination,customHeaderMap);
-            var disconnect = stompSender->disconnect();
-
+    resource function onError(error er) {
+        log:printError("An error occured", err = er);
+    }
 }

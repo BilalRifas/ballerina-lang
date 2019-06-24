@@ -46,11 +46,21 @@ public class ClientAckTest extends StompTestCommons {
 
     @Test(description = "Tests the sending of a string message to a queue")
     public void testClientAckSend() {
-        String log1 = "received: Hello World with Client Ack";
-        String log2 = "received: Hello World with Client Ack";
-        String log3 = "received: Hello World with Client Ack";
-        String log4 = "received: Hello World with Client Ack";
-        String log5 = "received: Hello World with Client Ack";
+        String log1 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World with Client Ack";
+        String log2 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World with Client Ack";
+        String log3 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World with Client Ack";
+        String log4 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World with Client Ack";
+        String log5 = "received:redelivered:false\n" +
+                "content-type:text/plain\n" +
+                "\n"+  "Hello World with Client Ack";
         String functionName = "testClientAckSend";
         testSend(result, log1, functionName, serverInstance);
         testSend(result, log2, functionName, serverInstance);
