@@ -557,6 +557,27 @@
                 <classifier>ballerina-binary-repo</classifier>
             </dependency>
 
+            <!-- ballerina-stomp -->
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-stomp</artifactId>
+                <version>${ballerina.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-stomp</artifactId>
+                <version>${ballerina.version}</version>
+                <type>zip</type>
+                <classifier>ballerina-sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-stomp</artifactId>
+                <version>${ballerina.version}</version>
+                <type>zip</type>
+                <classifier>ballerina-binary-repo</classifier>
+            </dependency>
+
             <!-- ballerina-jms -->
             <dependency>
                 <groupId>org.ballerinalang</groupId>
@@ -1074,9 +1095,9 @@
                 <version>${ballerina.version}</version>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>org.ballerinalang</groupId>-->
-                <!--<artifactId>ballerina-backend-bvm</artifactId>-->
-                <!--<version>${ballerina.version}</version>-->
+            <!--<groupId>org.ballerinalang</groupId>-->
+            <!--<artifactId>ballerina-backend-bvm</artifactId>-->
+            <!--<version>${ballerina.version}</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>org.ballerinalang</groupId>
@@ -1878,6 +1899,7 @@
                 <module>stdlib/openapi</module>
                 <module>stdlib/io</module>
                 <module>stdlib/socket</module>
+                <module>stdlib/stomp</module>
                 <module>stdlib/internal</module>
                 <module>stdlib/log-api</module>
                 <module>stdlib/transactions</module>
@@ -1978,6 +2000,7 @@
                 <module>stdlib/openapi</module>
                 <module>stdlib/io</module>
                 <module>stdlib/socket</module>
+                <module>stdlib/stomp</module>
                 <module>stdlib/internal</module>
                 <module>stdlib/log-api</module>
                 <module>stdlib/transactions</module>
@@ -2074,6 +2097,7 @@
                 <module>stdlib/openapi</module>
                 <module>stdlib/io</module>
                 <module>stdlib/socket</module>
+                <module>stdlib/stomp</module>
                 <module>stdlib/internal</module>
                 <module>stdlib/log-api</module>
                 <module>stdlib/transactions</module>

@@ -118,6 +118,12 @@
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-stomp</artifactId>
+            <type>zip</type>
+            <classifier>ballerina-sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-jms</artifactId>
             <type>zip</type>
             <classifier>ballerina-sources</classifier>
@@ -458,6 +464,7 @@
                                 ballerina-internal,
                                 ballerina-io,
                                 ballerina-jvm,
+                                ballerina-stomp,
                                 ballerina-jms,
                                 ballerina-log-api,
                                 ballerina-math,

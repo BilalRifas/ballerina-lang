@@ -1,0 +1,10 @@
+# To run the client, navigate to the directory that contains the
+# `.bal` file and use the `ballerina run ` command.
+$ ballerina run publisher.bal
+
+Starting up the Ballerina Stomp Service
+
+Connect to: 61613
+Successfully connected to stomp broker
+Message: Hello World From Ballerina - Sports is sent successfully
+Message: Hello World From Ballerina - News is sent successfully

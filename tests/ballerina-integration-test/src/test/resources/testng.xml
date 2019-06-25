@@ -277,6 +277,17 @@
         </classes>
     </test>
 
+<!--    <test name="ballerina-stomp-tests" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.ballerinalang.test.stomp.StompTestCommons"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.SimpleConsumerTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.MultipleConsumerTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.ClientAckTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.ClientIndividualAckTest"/>-->
+<!--            <class name="org.ballerinalang.test.stomp.DurableTopicConsumerTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+
     <test name="artemis-test" parallel="false">
         <classes>
             <class name="org.ballerinalang.test.messaging.artemis.ArtemisTestCommons"/>
