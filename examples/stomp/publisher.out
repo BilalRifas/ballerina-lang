@@ -1,0 +1,23 @@
+# To run the client, navigate to the directory that contains the
+# `.bal` file and use the `ballerina run ` command.
+$ ballerina run publisher.bal
+
+Starting up the Ballerina Stomp Service
+
+Successfully connected to stomp broker
+Connect to: 61613
+CONNECTED
+server:RabbitMQ/3.6.15
+session:session-ayVnDSHIzcO5_iTmH9tafA
+heart-beat:0,0
+version:1.1
+
+Message: Hello World From Ballerina is sent successfully
+RECEIPT
+receipt-id:abee3b5e-a3b6-4ae9-aeb2-fa127c840aaf
+
+# disconnecting from the broker port
+Disconnected from stomp broker successfully
+Leave from: 61613
+RECEIPT
+receipt-id:abee3b5e-a3b6-4ae9-aeb2-fa127c840aaf
