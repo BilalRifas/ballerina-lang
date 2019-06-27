@@ -18,6 +18,7 @@
 
 package org.ballerinalang.test.stomp;
 
+import org.awaitility.Awaitility;
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.CompileResult;
 import org.ballerinalang.test.util.TestUtils;
@@ -45,9 +46,6 @@ public class DurableTopicConsumerTest extends StompTestCommons {
         Path sourceSubcriberPath = Paths.get("src", "test", "resources", "stomp", "consumers");
         result = BCompileUtil.compile(sourceSubcriberPath.resolve("05_stomp_durable_topic_subscriber.bal")
                 .toAbsolutePath().toString());
-
-
-
         result2 = BCompileUtil.compile(sourcePublisherPath.resolve("stomp_publisher_durable_topic.bal")
                 .toAbsolutePath().toString());
     }
@@ -76,7 +74,7 @@ public class DurableTopicConsumerTest extends StompTestCommons {
         String functionName2 = "publishMessage";
         testSend(result2, log2, functionName2, serverInstance);
 
-        //Awaitility.await();
+        Awaitility.await();
 
         String functionName3 = "getMessage";
         testSend(result, log3, functionName3, serverInstance);
@@ -87,7 +85,7 @@ public class DurableTopicConsumerTest extends StompTestCommons {
         String functionName5 = "publishMessage2";
         testSend(result2, log5, functionName5, serverInstance);
 
-        //Awaitility.await();
+        Awaitility.await();
 
         String functionName6 = "invokeListener2";
         testSend(result, log6, functionName6, serverInstance);
@@ -99,9 +97,3 @@ public class DurableTopicConsumerTest extends StompTestCommons {
         testSend(result, log8, functionName8, serverInstance);
     }
 }
-
-//Awaitility.await()
-//        .dontCatchUncaughtExceptions()
-//        .atMost(1, TimeUnit.SECONDS)
-//        .pollInterval(10, TimeUnit.MILLISECONDS)
-//        .until(() -> future.isDone() && outcome != null);
