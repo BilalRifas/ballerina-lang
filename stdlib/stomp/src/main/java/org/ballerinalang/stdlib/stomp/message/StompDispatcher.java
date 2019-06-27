@@ -11,7 +11,9 @@ import org.ballerinalang.connector.api.ParamDetail;
 import org.ballerinalang.connector.api.Resource;
 import org.ballerinalang.connector.api.Service;
 import org.ballerinalang.connector.api.Struct;
+import org.ballerinalang.jvm.BallerinaValues;
 import org.ballerinalang.jvm.types.AttachedFunction;
+import org.ballerinalang.jvm.types.BType;
 import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
@@ -40,6 +42,7 @@ public class StompDispatcher {
     private static Map<String, AttachedFunction> resourceRegistry = new HashMap<>();
     private static Resource onMessageResource;
     private static Resource onErrorResource;
+    private static ObjectValue sessionObj;
     private static AttachedFunction onMessageAttachedFunction;
     private static AttachedFunction onErrorAttachedFunction;
     private static DefaultStompClient client;
@@ -93,8 +96,22 @@ public class StompDispatcher {
 
         if (onMessageAttachedFunction != null) {
 
-            Executor.submit(service, RabbitMQConstants.FUNC_ON_MESSAGE, new RabbitMQResourceCallback(countDownLatch),
-                    null, getMessageObjectValue(message, deliveryTag, properties));
+//            Executor.submit(service, RabbitMQConstants.FUNC_ON_MESSAGE, new RabbitMQResourceCallback(countDownLatch),
+//                    null, getMessageObjectValue(message, deliveryTag, properties));
+
+//            public void onMessage(ClientMessage clientMessage) {
+                BType[] parameterTypes = onMessageAttachedFunction.getParameterType();
+//                if (parameterTypes.length > 1) {
+//                    dispatchResourceWithDataBinding(clientMessage, parameterTypes);
+//                } else {
+                    Object[] signatureParams = new Object[parameterTypes.length * 2];
+                    signatureParams[0] = createAndGetMessageObj(body, sessionObj);
+                    signatureParams[1] = true;
+                    dispatchResource(clientMessage, signatureParams);
+//                }
+            }
+
+//            ProgramFile programFileTest = service.getType();
 
             ProgramFile programFile = onMessageAttachedFunction.getResourceInfo().getPackageInfo().getProgramFile();
             BMap<String, BValue> msgObj = BLangConnectorSPIUtil.createBStruct(programFile,
@@ -102,7 +119,6 @@ public class StompDispatcher {
             List<ParamDetail> paramDetails = onMessageResource.getParamDetails();
             if (paramDetails.get(0) != null) {
                 String callerType = paramDetails.get(0).getVarType().toString();
-
                 if (callerType.equals("string")) {
                     Executor.submit(onMessageResource, new ResponseCallback(),
                             new HashMap<>(), null, new BString(body));
@@ -123,23 +139,86 @@ public class StompDispatcher {
                 log.error("onMessage resource doesn't not have any parameter");
             }
         }
+
+    private Object createAndGetMessageObj(String clientMessage,
+                                          ObjectValue sessionObj) {
+        ObjectValue messageObj = BallerinaValues.createObjectValue(StompConstants.STOMP_PACKAGE,
+                StompConstants.MESSAGE_OBJ);
+        populateMessageObj(clientMessage, messageObj);
+        //Add artemis message
+        messageObj.getType(clientMessage);
+        return messageObj;
     }
 
-    private ObjectValue getMessageObjectValue(byte[] message, long deliveryTag, AMQP.BasicProperties properties) {
-        ObjectValue messageObjectValue = BallerinaValues.createObjectValue(RabbitMQConstants.PACKAGE_RABBITMQ,
-                RabbitMQConstants.MESSAGE_OBJECT);
-        messageObjectValue.addNativeData(RabbitMQConstants.DELIVERY_TAG, deliveryTag);
-        messageObjectValue.addNativeData(RabbitMQConstants.CHANNEL_NATIVE_OBJECT, channel);
-        messageObjectValue.addNativeData(RabbitMQConstants.MESSAGE_CONTENT, message);
-        messageObjectValue.addNativeData(RabbitMQConstants.AUTO_ACK_STATUS, autoAck);
-        if (!Objects.isNull(rabbitMQTransactionContext)) {
-            messageObjectValue.addNativeData(RabbitMQConstants.RABBITMQ_TRANSACTION_CONTEXT,
-                    rabbitMQTransactionContext);
-        }
-        messageObjectValue.addNativeData(RabbitMQConstants.BASIC_PROPERTIES, properties);
-        messageObjectValue.addNativeData(RabbitMQConstants.MESSAGE_ACK_STATUS, false);
-        return messageObjectValue;
+    public static void populateMessageObj(String clientMessage, ObjectValue messageObj) {
+        MapValue<String, Object> messageConfigObj = (MapValue<String, Object>) messageObj.get(
+                StompConstants.MESSAGE_CONFIG);
+        populateMessageConfigObj(clientMessage, messageConfigObj);
+
+        messageObj.addNativeData(ArtemisConstants.ARTEMIS_TRANSACTION_CONTEXT, transactionContext);
+        messageObj.addNativeData(ArtemisConstants.ARTEMIS_MESSAGE, clientMessage);
     }
+
+    private void dispatchResource(String clientMessage, Object... bValues) {
+        // A CountDownLatch is used to prevent multiple resources executing in parallel and hence preventing the use
+        // of the same session in multiple threads concurrently (Error AMQ212051).
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Executor.submit(scheduler, service, onMessageResource.getName(),
+                new ArtemisResourceCallback(clientMessage, autoAck, sessionObj, countDownLatch), null, bValues);
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static void populateMessageConfigObj(String clientMessage,
+                                                 MapValue<String, Object> messageConfigObj) {
+//        messageConfigObj.put(ArtemisConstants.EXPIRATION, clientMessage.getExpiration());
+//        messageConfigObj.put(ArtemisConstants.TIME_STAMP, clientMessage.getTimestamp());
+//        messageConfigObj.put(ArtemisConstants.PRIORITY, clientMessage.getPriority());
+//        messageConfigObj.put(ArtemisConstants.DURABLE, clientMessage.isDurable());
+
+        setRoutingTypeToConfig(messageConfigObj, clientMessage);
+        if (clientMessage.getGroupID() != null) {
+            messageConfigObj.put(ArtemisConstants.GROUP_ID, clientMessage.getGroupID().toString());
+        }
+        messageConfigObj.put(ArtemisConstants.GROUP_SEQUENCE, clientMessage.getGroupSequence());
+        if (clientMessage.getCorrelationID() != null) {
+            messageConfigObj.put(ArtemisConstants.CORRELATION_ID, clientMessage.getCorrelationID().toString());
+        }
+        if (clientMessage.getReplyTo() != null) {
+            messageConfigObj.put(ArtemisConstants.REPLY_TO, clientMessage.getReplyTo().toString());
+        }
+    }
+
+    private void dispatchResource(String clientMessage, Object... bValues) {
+        // A CountDownLatch is used to prevent multiple resources executing in parallel and hence preventing the use
+        // of the same session in multiple threads concurrently (Error AMQ212051).
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Executor.submit(scheduler, service, onMessageResource.getName(),
+                new ArtemisResourceCallback(clientMessage, autoAck, sessionObj, countDownLatch), null, bValues);
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+//    private ObjectValue getMessageObjectValue(byte[] message, long deliveryTag, AMQP.BasicProperties properties) {
+//        ObjectValue messageObjectValue = BallerinaValues.createObjectValue(RabbitMQConstants.PACKAGE_RABBITMQ,
+//                RabbitMQConstants.MESSAGE_OBJECT);
+//        messageObjectValue.addNativeData(RabbitMQConstants.DELIVERY_TAG, deliveryTag);
+//        messageObjectValue.addNativeData(RabbitMQConstants.CHANNEL_NATIVE_OBJECT, channel);
+//        messageObjectValue.addNativeData(RabbitMQConstants.MESSAGE_CONTENT, message);
+//        messageObjectValue.addNativeData(RabbitMQConstants.AUTO_ACK_STATUS, autoAck);
+//        if (!Objects.isNull(rabbitMQTransactionContext)) {
+//            messageObjectValue.addNativeData(RabbitMQConstants.RABBITMQ_TRANSACTION_CONTEXT,
+//                    rabbitMQTransactionContext);
+//        }
+//        messageObjectValue.addNativeData(RabbitMQConstants.BASIC_PROPERTIES, properties);
+//        messageObjectValue.addNativeData(RabbitMQConstants.MESSAGE_ACK_STATUS, false);
+//        return messageObjectValue;
+//    }
 
     private static class ResponseCallback implements CallableUnitCallback {
         @Override

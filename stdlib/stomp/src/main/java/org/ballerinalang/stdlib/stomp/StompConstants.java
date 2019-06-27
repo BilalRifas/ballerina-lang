@@ -48,6 +48,7 @@ public class StompConstants {
     public static final String SERVICE_CONFIG = "ServiceConfig";
     public static final String MSG_ID = "id";
     public static final String MESSAGE_OBJ = "Message";
+    public static final String MESSAGE_CONFIG = "configuration";
     public static final String ACK_MODE = "ack-mode";
     public static final String ACK_AUTO = "auto";
     public static final String ACK_CLIENT = "client";
